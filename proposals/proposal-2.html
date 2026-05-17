@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PocketTriage — field notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE3;
+  --paper-edge:#E8E1CF;
+  --ink:#2A2422;
+  --ink-soft:#5B524C;
+  --ink-mute:#8C8276;
+  --rule:#D6CDB6;
+  --rule-strong:#A89E83;
+  --stamp:#B23A2D;
+  --stamp-soft:rgba(178,58,45,0.10);
+  --pink:#B23A2D;
+  --yellow:#A87918;
+  --green:#4A6B2E;
+  --highlight:rgba(247,217,108,0.55);
+  --ease:cubic-bezier(0.23,1,0.32,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Serif',Georgia,serif;
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  /* Paper texture: noise + warm wash + horizontal ruled lines visible only in places */
+  background-color:var(--paper);
+  background-image:
+    radial-gradient(ellipse 70% 50% at 20% 0%, rgba(178,58,45,0.05), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(74,107,46,0.05), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.15  0 0 0 0 0.12  0 0 0 0 0.08  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-attachment:fixed, fixed, scroll;
+  background-blend-mode:multiply, multiply, normal;
+}
+.wrap{
+  max-width:880px;
+  margin:0 auto;
+  padding:40px 28px 96px;
+}
+@media (min-width:900px){.wrap{padding:64px 40px 120px}}
+
+/* Notebook spine + binding holes (top-of-page chrome) */
+.spine{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding-bottom:12px;
+  border-bottom:2px solid var(--ink);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.spine .mark{
+  font-family:'IBM Plex Serif',serif;
+  font-weight:500;
+  font-size:15px;
+  letter-spacing:0;
+  text-transform:none;
+  color:var(--ink);
+}
+.spine .holes{display:flex;gap:14px}
+.spine .holes span{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--paper-edge);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(255,255,255,0.4);
+}
+.spine .nav{display:flex;gap:14px}
+.spine .nav a{color:var(--ink-soft);text-decoration:none;border-bottom:1px dashed var(--rule-strong)}
+.spine .nav a:hover{color:var(--stamp);border-color:var(--stamp)}
+
+/* Page header — hand-numbered */
+.page-no{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  margin-top:22px;
+}
+.title{
+  font-family:'IBM Plex Serif',serif;
+  font-weight:400;
+  font-size:clamp(36px, 5.5vw, 56px);
+  line-height:1.1;
+  letter-spacing:-0.015em;
+  margin:8px 0 18px;
+  color:var(--ink);
+}
+.title em{
+  font-style:italic;
+  background:linear-gradient(180deg, transparent 0 60%, var(--highlight) 60% 92%, transparent 92%);
+  padding:0 4px;
+}
+.subtitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;
+  line-height:1.55;
+  letter-spacing:0;
+  color:var(--ink-soft);
+  max-width:62ch;
+  margin:0;
+}
+
+/* Stamp */
+.stamp{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--stamp);
+  border:2px solid var(--stamp);
+  padding:5px 10px;
+  border-radius:3px;
+  transform:rotate(-2deg);
+  background:rgba(255,253,247,0.5);
+}
+
+/* Hero "field note" card */
+.note-card{
+  margin-top:30px;
+  background:#FBF7EC;
+  border:1px solid var(--rule-strong);
+  border-left:6px solid var(--stamp);
+  border-radius:2px;
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.06),
+    0 14px 28px -16px rgba(42,36,34,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.6);
+  padding:24px 26px 22px;
+  position:relative;
+}
+.note-card::before{
+  content:"CASE LOG";
+  position:absolute;
+  top:-14px;left:18px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:0.22em;
+  background:var(--paper);
+  padding:4px 10px;
+  border:1px solid var(--rule-strong);
+  color:var(--ink-soft);
+}
+.note-row{display:flex;justify-content:space-between;gap:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-mute);font-variant-numeric:tabular-nums}
+.pat{
+  margin:14px 0 18px;
+  font-family:'IBM Plex Serif',serif;
+  font-style:italic;
+  font-size:18px;
+  line-height:1.55;
+  color:var(--ink);
+}
+.tier-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.tier{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--pink);
+  color:#FBF7EC;
+  padding:9px 14px;
+  border-radius:2px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;letter-spacing:0.06em;font-weight:600;
+  box-shadow:2px 2px 0 var(--ink);
+}
+.tier .glyph{width:10px;height:10px;background:#FBF7EC;border-radius:50%}
+.tier-tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--ink-mute);
+}
+.pathway{
+  margin:14px 0 4px;
+  font-family:'IBM Plex Serif',serif;
+  font-size:17px;line-height:1.55;
+  color:var(--ink);
+  border-top:1px dashed var(--rule);
+  padding-top:14px;
+}
+.reasoning{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;line-height:1.6;
+  color:var(--ink-soft);
+  margin-top:8px;
+}
+.note-foot{
+  display:flex;justify-content:space-between;
+  margin-top:14px;padding-top:10px;border-top:1px solid var(--rule);
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--ink-mute);font-variant-numeric:tabular-nums;
+}
+.heartbeat{display:inline-flex;align-items:center;gap:8px}
+.heartbeat .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(74,107,46,0.7);animation:beat 2s var(--ease) infinite}
+@keyframes beat{0%,100%{box-shadow:0 0 0 0 rgba(74,107,46,0.6)}50%{box-shadow:0 0 0 8px rgba(74,107,46,0)}}
+
+/* CTA */
+.cta{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;letter-spacing:0.08em;text-transform:uppercase;font-weight:500;
+  text-decoration:none;
+  padding:11px 16px;
+  border-radius:2px;
+  transition:transform 150ms var(--ease), box-shadow 150ms var(--ease), background 150ms var(--ease);
+}
+.btn.solid{background:var(--ink);color:var(--paper);box-shadow:3px 3px 0 var(--stamp)}
+.btn.solid:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--stamp)}
+.btn.solid:active{transform:translate(2px,2px) scale(0.99);box-shadow:1px 1px 0 var(--stamp);transition-duration:80ms}
+.btn.ghost{background:transparent;color:var(--ink);border:1px dashed var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--paper);border-style:solid}
+
+/* Section divider — torn paper */
+.section{
+  margin-top:80px;
+  padding-top:18px;
+  position:relative;
+}
+.section::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background-image:linear-gradient(to right, var(--ink) 0 8px, transparent 8px 14px);
+  background-size:14px 1px;
+}
+.tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--stamp);
+  background:var(--paper);
+  padding:0 8px;margin-left:-8px;
+}
+.head{
+  font-family:'IBM Plex Serif',serif;
+  font-weight:400;
+  font-size:30px;
+  line-height:1.18;
+  letter-spacing:-0.01em;
+  margin:10px 0 18px;
+  max-width:32ch;
+}
+.lead{color:var(--ink-soft);max-width:64ch;margin:0}
+
+/* Evidence as a handwritten ledger table */
+.ledger{
+  margin-top:18px;
+  width:100%;
+  border-collapse:collapse;
+  background:repeating-linear-gradient(180deg, transparent 0 35px, rgba(168,158,131,0.12) 35px 36px);
+  font-family:'IBM Plex Mono',monospace;font-size:13px;
+  font-variant-numeric:tabular-nums;
+}
+.ledger th{
+  text-align:left;font-weight:500;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-mute);
+  border-bottom:1px solid var(--ink);
+  padding:10px 12px 8px;
+}
+.ledger td{padding:11px 12px;border-bottom:1px dashed var(--rule-strong);color:var(--ink)}
+.ledger tr:last-child td{border-bottom:1px solid var(--ink)}
+.tag-tier{
+  display:inline-block;padding:2px 9px;border-radius:2px;font-weight:600;font-size:11px;letter-spacing:0.06em;color:#FBF7EC;
+}
+.tag-tier.pink{background:var(--pink)}
+.tag-tier.yellow{background:var(--yellow)}
+.tag-tier.green{background:var(--green)}
+.proof{
+  margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+  color:var(--ink-soft);background:#FBF7EC;border:1px dashed var(--rule-strong);padding:10px 14px;border-radius:2px;
+}
+
+/* Architecture: ASCII pipeline on grid paper */
+.pipe{
+  margin-top:16px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(168,158,131,0.18) 23px 24px),
+    repeating-linear-gradient(90deg, transparent 0 23px, rgba(168,158,131,0.10) 23px 24px),
+    #FBF7EC;
+  border:1px solid var(--rule-strong);
+  padding:20px 22px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12.5px;
+  line-height:1.7;
+  color:var(--ink);
+  white-space:pre;
+  overflow-x:auto;
+}
+.pipe .a{color:var(--stamp);font-weight:600}
+.pipe .b{color:var(--green);font-weight:600}
+
+/* Safety rules — handbook style */
+.rules{margin-top:8px;padding:0;list-style:none}
+.rules li{
+  display:grid;grid-template-columns:88px 1fr;gap:18px;padding:18px 0;border-bottom:1px solid var(--rule);
+}
+.rules li:last-child{border-bottom:none}
+.rules .badge{
+  align-self:start;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  color:#FBF7EC;background:var(--ink);padding:5px 8px;border-radius:2px;text-align:center;
+  box-shadow:2px 2px 0 var(--stamp);
+}
+.rules .copy{font-family:'IBM Plex Serif',serif;font-size:17px;line-height:1.55;color:var(--ink)}
+.rules .copy em{background:linear-gradient(180deg, transparent 0 65%, var(--highlight) 65% 90%, transparent 90%);font-style:normal;padding:0 2px}
+
+/* Outreach as recipe cards */
+.contacts{display:grid;grid-template-columns:1fr;gap:14px;margin-top:8px}
+@media (min-width:760px){.contacts{grid-template-columns:1fr 1fr}}
+.contact{
+  background:#FBF7EC;border:1px solid var(--rule-strong);border-radius:2px;padding:16px 18px;
+  position:relative;
+}
+.contact::before{
+  content:"";position:absolute;top:-1px;left:24px;right:24px;height:5px;background:var(--stamp);
+}
+.contact .who{font-family:'IBM Plex Serif',serif;font-size:17px;color:var(--ink);margin-top:4px}
+.contact .role{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-mute);margin-top:6px;line-height:1.55}
+.contact .status{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--stamp);
+}
+.contact .status::before{content:"";display:inline-block;width:8px;height:8px;border:1.5px solid var(--stamp);border-radius:50%}
+
+/* Run locally — typewriter listing */
+.cmd{
+  margin-top:16px;background:#1E1B19;color:#F0E8D6;border-radius:3px;padding:20px 22px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.75;overflow-x:auto;
+  box-shadow:0 14px 28px -14px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+.cmd .c{color:#9C9082}
+.cmd .a{color:#E8A24A}
+
+/* Footer — colophon */
+.colophon{
+  margin-top:96px;padding-top:18px;border-top:2px solid var(--ink);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.04em;color:var(--ink-mute);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;
+}
+.colophon a{color:var(--ink-soft);text-decoration:none;border-bottom:1px dashed var(--rule-strong)}
+.colophon a:hover{color:var(--stamp);border-color:var(--stamp)}
+
+.reveal{opacity:0;transform:translateY(8px);transition:opacity 600ms var(--ease), transform 600ms var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .heartbeat .dot{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="spine">
+    <div class="mark">PocketTriage · Field notebook v0.1</div>
+    <div class="holes"><span></span><span></span><span></span></div>
+    <nav class="nav">
+      <a href="https://github.com/yonkoo11/pockettriage">Repository</a>
+      <a href="https://huggingface.co/spaces/yonko11/pockettriage">Live demo</a>
+    </nav>
+  </header>
+
+  <div class="page-no">Page 1 · Anambra · 17.05.2026</div>
+  <h1 class="title">A paediatric IMCI assistant that fits in a <em>community health worker's pocket</em>.</h1>
+  <p class="subtitle">Type the symptoms. Get the WHO IMCI tier and pathway. Wi-Fi off. Cellular off. Nothing leaves the device.</p>
+
+  <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+    <span class="stamp">Apache 2.0</span>
+    <span class="stamp" style="transform:rotate(1.5deg);border-color:var(--ink);color:var(--ink)">Gemma 4 E2B · on-device</span>
+    <span class="stamp" style="transform:rotate(-0.5deg);border-color:var(--green);color:var(--green)">Phase 1 Gate · 4/4</span>
+  </div>
+
+  <div class="note-card reveal">
+    <div class="note-row"><span>Case · S1 · severe pneumonia</span><span class="heartbeat"><span class="dot"></span>Airplane mode · 0 packets observed</span></div>
+    <p class="pat">"11-month-old boy. Cough for 3 days. Breathing 58/min. Chest is sucking in. Restless and refusing to drink."</p>
+    <div class="tier-row">
+      <span class="tier"><span class="glyph"></span>PINK — REFER URGENTLY</span>
+      <span class="tier-tag">Section 2 · severe pneumonia / very severe disease</span>
+    </div>
+    <p class="pathway">Give first dose of injectable ampicillin + gentamicin (or oral amoxicillin if no injectable available). Refer urgently to the nearest hospital.</p>
+    <p class="reasoning">danger_signs = { chest_indrawing: true, refusing_to_drink: true } &nbsp;|&nbsp; confidence = 1.00 &nbsp;|&nbsp; safety_overrides = none</p>
+    <div class="note-foot"><span>backend = ollama → gemma4:e2b</span><span>container_latency = 10.6 s · M-series</span></div>
+  </div>
+
+  <div class="cta">
+    <a class="btn solid" href="https://huggingface.co/spaces/yonko11/pockettriage">Try a real triage →</a>
+    <a class="btn ghost" href="https://github.com/yonkoo11/pockettriage">Read the source</a>
+  </div>
+
+  <!-- EVIDENCE -->
+  <section class="section">
+    <span class="tag">§ I · Evidence</span>
+    <h2 class="head">Four canonical IMCI scenarios. Wi-Fi off. tcpdump running.</h2>
+    <p class="lead">Phase 1 Gate, recorded by hand and by hand-rolled instrumentation. Scenarios are pulled straight from the WHO IMCI Chart Booklet 2014.</p>
+
+    <table class="ledger">
+      <thead><tr><th>#</th><th>Case</th><th>Expected</th><th>Actual</th><th>Latency</th></tr></thead>
+      <tbody>
+        <tr><td>S1</td><td>Severe pneumonia · chest indrawing + refusing to drink</td><td><span class="tag-tier pink">PINK</span></td><td><span class="tag-tier pink">PINK</span></td><td>10.6 s</td></tr>
+        <tr><td>S2</td><td>Some dehydration · diarrhoea + restless + sunken eyes + slow skin pinch</td><td><span class="tag-tier yellow">YELLOW</span></td><td><span class="tag-tier yellow">YELLOW</span></td><td>10.7 s</td></tr>
+        <tr><td>S3</td><td>Uncomplicated malaria · RDT-positive fever, no danger signs</td><td><span class="tag-tier yellow">YELLOW</span></td><td><span class="tag-tier yellow">YELLOW</span></td><td>9.3 s</td></tr>
+        <tr><td>S4</td><td>Cough or cold · cough + drinking well + no chest indrawing</td><td><span class="tag-tier green">GREEN</span></td><td><span class="tag-tier green">GREEN</span></td><td>8.4 s</td></tr>
+      </tbody>
+    </table>
+    <p class="proof">$ wc -l /tmp/airplane-net.log<br>&nbsp;&nbsp;&nbsp;&nbsp;0<br>$ # zero non-localhost packets across the entire run · eval/airplane-test-log.md</p>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section class="section">
+    <span class="tag">§ II · Architecture</span>
+    <h2 class="head">One narrow path. No cloud fallback. No telemetry to anyone.</h2>
+    <div class="pipe">CHW symptom  (+ optional photo)
+       │
+       ▼
+   <span class="a">infer.py</span>   builds WHO-IMCI grounded chat
+       │
+       ▼
+   <span class="a">ollama @ 127.0.0.1:11434</span>   →   gemma4:e2b   (5.1 B · Q4_K_M)
+       │
+       ▼   raw string
+   _extract_first_json  ·  _validate_shape          ← tolerant coerce
+       │
+       ▼   { tier · pathway · reasoning · confidence }
+   <span class="b">safety.apply_safety_layer</span>
+        R13 · danger-sign  → force PINK
+        R14 · conf &lt; 0.4   → append "Escalate to medical officer"
+        R15 · adult case   → refusal
+       │
+       ▼
+   Gradio renders tier · pathway · reasoning · safety flags</div>
+  </section>
+
+  <!-- SAFETY -->
+  <section class="section">
+    <span class="tag">§ III · Safety</span>
+    <h2 class="head">Four invariants the model cannot override.</h2>
+    <p class="lead">PocketTriage treats the classifier as fallible. The safety layer runs <em>after</em> the model. 17 unit tests cover it (laptop/test_safety.py).</p>
+    <ol class="rules">
+      <li><span class="badge">R13 · PINK</span><span class="copy">If the symptom text or model reasoning contains any WHO IMCI general danger sign, <em>tier is forced to PINK</em>. Negation-aware: "no chest indrawing" does not fire.</span></li>
+      <li><span class="badge">R14 · FLOOR</span><span class="copy">If confidence &lt; 0.4, append "Escalate to medical officer" — <em>low-confidence cases never bypass a human</em>.</span></li>
+      <li><span class="badge">R15 · ADULT</span><span class="copy">Adult-specific conditions (chest pain in adult, stroke, pregnancy emergency) return a refusal. Paediatric scope, <em>hard boundary</em>.</span></li>
+      <li><span class="badge">R16 · BANNER</span><span class="copy">A non-dismissable banner — "Decision support based on WHO IMCI 2014. Does NOT replace clinical judgment. Paediatric only (2 months – 5 years)." — is part of the layout, not a popup.</span></li>
+    </ol>
+  </section>
+
+  <!-- DISTRIBUTION -->
+  <section class="section">
+    <span class="tag">§ IV · Distribution</span>
+    <h2 class="head">Outreach drafted with named contacts. Sent when the demo URL is green.</h2>
+    <p class="lead">Letters are in <code>outreach/</code> — full email bodies, shorter LinkedIn / WhatsApp variants, send-log tables.</p>
+    <div class="contacts">
+      <div class="contact"><div class="who">WHO Digital Health &amp; Innovation</div><div class="role">Dr. Alain Labrique · Director, DHI · Geneva.<br>+ Bernardo Mariano Jr. as backup.</div><div class="status">Letter drafted</div></div>
+      <div class="contact"><div class="who">India NHM · ASHA programme</div><div class="role">Smt. Roli Singh, IAS · Add. Secretary &amp; Mission Director · New Delhi.<br>+ NHSRC + Maharashtra state MD.</div><div class="status">Letter drafted</div></div>
+      <div class="contact"><div class="who">Nigerian NPHCDA</div><div class="role">Dr. Muyi Aina · Executive Director · Abuja.<br>+ Anambra SPHCDA + FMoH Coordinating Minister Pate.</div><div class="status">Letter drafted</div></div>
+    </div>
+  </section>
+
+  <!-- RUN LOCALLY -->
+  <section class="section">
+    <span class="tag">§ V · Run locally</span>
+    <h2 class="head">Clean clone to first triage — about fifteen minutes.</h2>
+    <pre class="cmd"><span class="c"># 1. Install Ollama</span>
+brew install ollama
+ollama serve &amp;
+
+<span class="c"># 2. Pull the model (one-time, ~7 GB)</span>
+ollama pull gemma4:e2b
+
+<span class="c"># 3. Run PocketTriage</span>
+git clone https://github.com/yonkoo11/pockettriage
+cd pockettriage/laptop
+python3.12 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+
+<span class="c"># 4. Verify Phase 1 Gate</span>
+python eval_runner.py     <span class="c"># 4 / 4 PASS</span>
+
+<span class="c"># 5. Launch the UI</span>
+python app.py             <span class="c"># → http://127.0.0.1:7860</span></pre>
+  </section>
+
+  <footer class="colophon">
+    <div>
+      <a href="https://github.com/yonkoo11/pockettriage">github.com/yonkoo11/pockettriage</a> ·
+      <a href="https://huggingface.co/spaces/yonko11/pockettriage">huggingface.co/spaces/yonko11/pockettriage</a>
+    </div>
+    <div>Mustapha Alex · Medical intern, Nigeria · Apache 2.0</div>
+  </footer>
+</div>
+
+<script>
+const io = new IntersectionObserver((entries)=>{
+  for (const e of entries){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }
+}, {threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

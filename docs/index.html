@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PocketTriage — offline WHO IMCI paediatric triage on Gemma 4</title>
+<meta name="description" content="An open-source on-device paediatric IMCI triage classifier for community health workers. Gemma 4 runs entirely on the device. Apache 2.0." />
+<meta property="og:title" content="PocketTriage — offline WHO IMCI paediatric triage" />
+<meta property="og:description" content="Gemma 4 on-device. Pink / Yellow / Green tier and structured referral pathway. Nothing leaves the device." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://raw.githubusercontent.com/yonkoo11/pockettriage/master/writeup/cover-image.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --base:#FCFCFA;
+  --surface:#F4F4EF;
+  --elev:#FFFFFF;
+  --ink:#0E1116;
+  --ink-soft:#3F4651;
+  --ink-mute:#6E7682;
+  --rule:#E5E2DA;
+  --rule-strong:#C8C5BB;
+  --accent:#003D72;
+  --accent-2:#00558C;
+  --accent-soft:rgba(0,61,114,0.10);
+  --accent-glow:rgba(0,61,114,0.22);
+  --pink:#C9234A;
+  --pink-soft:rgba(201,35,74,0.10);
+  --yellow:#B7841B;
+  --green:#1F6F3A;
+  --green-soft:rgba(31,111,58,0.10);
+  --ease:cubic-bezier(0.23,1,0.32,1);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --shadow-xs:0 1px 0 rgba(14,17,22,0.04);
+  --shadow-s:0 1px 2px rgba(14,17,22,0.05);
+  --shadow-m:0 4px 10px -3px rgba(14,17,22,0.10), 0 1px 2px rgba(14,17,22,0.06);
+  --shadow-l:0 24px 48px -24px rgba(14,17,22,0.22), 0 2px 6px rgba(14,17,22,0.06);
+  --shadow-xl:0 40px 80px -40px rgba(14,17,22,0.28), 0 8px 16px -8px rgba(14,17,22,0.10);
+  --focus:0 0 0 3px rgba(0,61,114,0.35);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--base);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  font-feature-settings:"ss01","cv11";
+  position:relative;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--accent-soft), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 0% 100%, var(--green-soft), transparent 60%),
+    radial-gradient(ellipse 40% 20% at 50% 0%, rgba(201,35,74,0.05), transparent 60%);
+  background-attachment:fixed;
+}
+/* Subtle paper noise overlay (mandatory liveness layer) */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.07  0 0 0 0 0.05  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity:0.45;
+  mix-blend-mode:multiply;
+}
+.shell{max-width:1180px;margin:0 auto;padding:24px 24px 80px;position:relative;z-index:1}
+@media (min-width:980px){.shell{padding:36px 40px 120px}}
+
+/* ============ TOP BAR ============ */
+.bar{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding-bottom:16px;border-bottom:1px solid var(--rule);
+  flex-wrap:wrap;
+}
+.brand{
+  display:flex;align-items:center;gap:12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;letter-spacing:0.02em;color:var(--ink);
+}
+.brand .seal{
+  width:32px;height:32px;border-radius:7px;
+  background:linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  display:grid;place-items:center;color:#fff;
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.30),
+    0 1px 2px rgba(0,61,114,0.20),
+    0 8px 16px -6px var(--accent-glow);
+}
+.brand .name{font-weight:600;letter-spacing:0.01em;font-size:14px}
+.brand .ver{color:var(--ink-mute);margin-left:6px;font-size:12px}
+.bar nav{display:flex;flex-wrap:wrap;gap:18px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.04em;text-transform:uppercase}
+.bar nav a{color:var(--ink-soft);text-decoration:none;padding:6px 2px;border-bottom:1px solid transparent;transition:color 150ms var(--ease), border-color 150ms var(--ease)}
+.bar nav a:hover{color:var(--accent);border-color:var(--accent)}
+.bar nav a:focus-visible{outline:none;box-shadow:var(--focus);border-radius:3px}
+
+/* ============ HERO ============ */
+.hero{margin-top:36px;display:grid;grid-template-columns:1fr;gap:32px}
+@media (min-width:980px){.hero{grid-template-columns:1.08fr 1fr;gap:48px;align-items:start}}
+
+.kicker{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;letter-spacing:0.20em;text-transform:uppercase;
+  color:var(--accent);
+}
+.kicker .num{color:var(--ink-mute)}
+
+.h1{
+  font-family:'Fraunces',Georgia,serif;
+  font-weight:400;
+  font-variation-settings:"opsz" 144;
+  font-size:clamp(40px, 5.6vw, 64px);
+  line-height:1.04;
+  letter-spacing:-0.022em;
+  margin:14px 0 16px;
+  color:var(--ink);
+  max-width:18ch;
+}
+
+.lede{
+  font-size:19px;line-height:1.55;color:var(--ink-soft);
+  max-width:52ch;margin:0;
+}
+.lede::first-letter{
+  font-family:'Fraunces',serif;
+  font-weight:400;
+  float:left;
+  font-size:54px;
+  line-height:0.85;
+  padding:6px 8px 0 0;
+  color:var(--ink);
+  font-variation-settings:"opsz" 144;
+}
+
+.byline{
+  margin-top:20px;
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:13px;color:var(--ink-mute);
+  display:flex;flex-wrap:wrap;gap:18px;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:0.01em;
+}
+.byline span + span{padding-left:18px;border-left:1px solid var(--rule)}
+
+/* Stamped badge row */
+.stamps{margin-top:20px;display:flex;flex-wrap:wrap;gap:10px}
+.stamp{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;letter-spacing:0.18em;text-transform:uppercase;
+  padding:6px 11px;border-radius:4px;
+  background:var(--elev);
+  border:1.5px solid var(--rule-strong);
+  color:var(--ink-soft);
+  box-shadow:var(--shadow-xs);
+}
+.stamp.apache{border-color:rgba(31,111,58,0.45);color:var(--green);background:#F5FAF6}
+.stamp.gemma{border-color:rgba(0,61,114,0.45);color:var(--accent);background:#F4F8FB}
+.stamp.gate{border-color:rgba(201,35,74,0.45);color:var(--pink);background:#FCF5F7}
+.stamp .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.85}
+
+/* Specrow — the "in 5 seconds" evidence block */
+.specrow{
+  margin-top:26px;display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:1px;
+  background:var(--rule);
+  border:1px solid var(--rule);border-radius:8px;overflow:hidden;
+  box-shadow:var(--shadow-s);
+}
+@media (min-width:600px){.specrow{grid-template-columns:repeat(4, minmax(0,1fr))}}
+.spec{
+  background:var(--elev);padding:14px 16px;
+}
+.spec .label{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink-mute);font-weight:500}
+.spec .val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.1}
+.spec .val .unit{font-size:12px;color:var(--ink-mute);margin-left:5px;font-weight:500;letter-spacing:0.02em}
+
+.actions{margin-top:26px;display:flex;flex-wrap:wrap;gap:12px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  min-height:44px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:0.04em;font-weight:600;
+  text-decoration:none;padding:11px 18px;border-radius:6px;
+  transition:transform 150ms var(--ease), box-shadow 150ms var(--ease), background 150ms var(--ease), color 150ms var(--ease);
+}
+.btn.primary{
+  background:var(--accent);color:#fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.20),
+    0 1px 2px rgba(0,61,114,0.30),
+    0 8px 22px -8px var(--accent-glow),
+    0 0 0 1px rgba(0,61,114,0.30);
+}
+.btn.primary:hover{
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.20),
+    0 1px 2px rgba(0,61,114,0.30),
+    0 14px 30px -10px var(--accent-glow),
+    0 0 0 1px rgba(0,61,114,0.40);
+}
+.btn.primary:active{transform:translateY(0) scale(0.98);transition-duration:80ms}
+.btn.primary:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(0,61,114,0.40), 0 14px 30px -10px var(--accent-glow)}
+.btn.ghost{background:var(--elev);color:var(--ink);box-shadow:0 0 0 1px var(--rule-strong), var(--shadow-xs)}
+.btn.ghost:hover{background:var(--surface);box-shadow:0 0 0 1px var(--accent), var(--shadow-s);color:var(--accent);transform:translateY(-1px)}
+.btn.ghost:active{transform:translateY(0) scale(0.98);transition-duration:80ms}
+.btn.ghost:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(0,61,114,0.30), 0 0 0 1px var(--accent)}
+.btn .arrow{transition:transform 150ms var(--ease);display:inline-block}
+.btn:hover .arrow{transform:translateX(3px)}
+
+/* ============ DEVICE READOUT (HERO RIGHT) ============ */
+.device{
+  background:var(--elev);
+  border:1px solid var(--rule);
+  border-radius:12px;
+  box-shadow:var(--shadow-xl), inset 0 1px 0 #fff;
+  overflow:hidden;
+  position:relative;
+}
+.device::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 40% at 80% 0%, var(--accent-soft), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, var(--green-soft), transparent 60%);
+}
+.device > *{position:relative}
+.device > header{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 18px;border-bottom:1px solid var(--rule);
+  background:var(--surface);
+  flex-wrap:wrap;
+}
+.device > header .lbl{
+  display:flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-mute);font-weight:500;
+}
+.device > header .lbl .seal-mini{width:22px;height:22px;border-radius:4px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600}
+.device > header .right{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.10em;text-transform:uppercase;color:var(--green);font-weight:600;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.device > header .right .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(31,111,58,0.7);animation:p 2.2s var(--ease) infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(31,111,58,0.55)}70%{box-shadow:0 0 0 10px rgba(31,111,58,0)}100%{box-shadow:0 0 0 0 rgba(31,111,58,0)}}
+
+.device .case{
+  padding:18px 22px 6px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;color:var(--ink-soft);
+}
+.device .case .k{color:var(--accent);font-weight:600;letter-spacing:0.04em}
+.device .out{padding:8px 22px 22px}
+.tier-band{
+  display:flex;align-items:stretch;border-radius:8px;overflow:hidden;
+  border:1px solid rgba(201,35,74,0.30);
+  box-shadow:0 0 0 4px var(--pink-soft), 0 14px 28px -14px rgba(201,35,74,0.25);
+}
+.tier-band .left{
+  background:var(--pink);color:#fff;padding:16px 20px;display:flex;flex-direction:column;justify-content:center;min-width:138px;
+}
+.tier-band .left .top{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;opacity:0.88;font-weight:500}
+.tier-band .left .big{font-family:'Inter',sans-serif;font-weight:700;font-size:24px;letter-spacing:-0.01em;line-height:1.05;margin-top:4px}
+.tier-band .right{
+  background:#FFF6F8;padding:16px 20px;flex:1;
+  font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.55;color:var(--ink);
+}
+.pathway{margin:0}
+.pathway strong{font-weight:600}
+.reasoning{
+  margin-top:14px;padding:13px 15px;background:var(--surface);border-radius:6px;
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;color:var(--ink-soft);
+}
+.reasoning .key{color:var(--ink-mute);font-weight:500}
+.reasoning .v{color:var(--ink)}
+.device > footer{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+  padding:11px 18px;border-top:1px solid var(--rule);background:var(--surface);
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.04em;color:var(--ink-mute);font-variant-numeric:tabular-nums;
+}
+
+/* ============ SECTION TEMPLATE ============ */
+.section{margin-top:92px}
+.section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  padding-bottom:16px;border-bottom:1px solid var(--rule);
+}
+.section-head .left{max-width:62ch}
+.tag{
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);
+  display:inline-flex;align-items:center;gap:10px;font-weight:600;
+}
+.tag .num{color:var(--ink-mute);font-weight:500}
+.h2{font-family:'Fraunces',Georgia,serif;font-weight:400;font-variation-settings:"opsz" 144;font-size:34px;line-height:1.18;letter-spacing:-0.015em;margin:10px 0 0;color:var(--ink);max-width:24ch}
+.h2 + .sub{font-size:16px;color:var(--ink-soft);margin-top:10px;max-width:64ch;line-height:1.6}
+.section-head .meta{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.10em;text-transform:uppercase;color:var(--ink-mute);font-variant-numeric:tabular-nums;align-self:flex-start;margin-top:8px}
+
+/* Evidence table */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-family:'JetBrains Mono',monospace;font-size:13.5px;font-variant-numeric:tabular-nums;margin-top:20px;background:var(--elev);border:1px solid var(--rule);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-m)}
+.tbl th{
+  text-align:left;font-weight:600;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-mute);
+  padding:13px 14px;background:var(--surface);border-bottom:1px solid var(--rule);
+}
+.tbl td{padding:15px 14px;border-bottom:1px solid var(--rule);color:var(--ink);font-size:13.5px;line-height:1.5}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr{transition:background 150ms var(--ease)}
+.tbl tr:hover td{background:var(--surface)}
+.tier-pill{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:11.5px;letter-spacing:0.06em;padding:5px 10px;border-radius:5px;color:#fff;box-shadow:var(--shadow-xs)}
+.tier-pill .g{width:6px;height:6px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,0.35)}
+.tier-pill.pink{background:var(--pink)}
+.tier-pill.yellow{background:var(--yellow)}
+.tier-pill.green{background:var(--green)}
+.pass-cell{color:var(--green);font-weight:700;letter-spacing:0.06em;font-size:12px}
+
+.airplane-proof{
+  margin-top:16px;display:flex;align-items:center;gap:14px;padding:14px 18px;
+  background:var(--elev);border:1px solid var(--rule);border-radius:8px;box-shadow:var(--shadow-s);
+  font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-soft);
+  flex-wrap:wrap;
+}
+.airplane-proof .lt{
+  display:inline-flex;align-items:center;gap:8px;padding:7px 11px;background:var(--accent-soft);color:var(--accent);
+  border-radius:5px;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;
+}
+
+/* Architecture pipeline */
+.pipeline{
+  margin-top:20px;display:grid;grid-template-columns:1fr;gap:14px;background:var(--surface);
+  border:1px solid var(--rule);border-radius:12px;padding:24px;
+  position:relative;overflow:hidden;
+}
+.pipeline::before{
+  content:"";position:absolute;inset:0;background:
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--accent-soft), transparent 60%),
+    radial-gradient(ellipse 50% 30% at 0% 100%, var(--green-soft), transparent 60%);
+  pointer-events:none;
+}
+.pipe-step{
+  position:relative;background:var(--elev);border:1px solid var(--rule);border-radius:9px;
+  padding:16px 20px;box-shadow:var(--shadow-s);
+  transition:transform 150ms var(--ease), box-shadow 150ms var(--ease);
+}
+.pipe-step:hover{transform:translateY(-1px);box-shadow:var(--shadow-m)}
+.pipe-step .step-no{
+  position:absolute;top:-11px;left:18px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;
+  background:var(--accent);color:#fff;padding:3px 9px;border-radius:4px;box-shadow:var(--shadow-xs);
+}
+.pipe-step .step-title{font-family:'Inter',sans-serif;font-weight:600;font-size:16px;color:var(--ink);letter-spacing:-0.005em}
+.pipe-step .step-body{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.6}
+.pipe-step.accent{border-color:rgba(0,61,114,0.40);box-shadow:0 0 0 4px var(--accent-soft), var(--shadow-m)}
+.pipe-step.accent .step-no{background:var(--accent)}
+.pipe-step.safety{border-color:rgba(178,131,29,0.45);box-shadow:0 0 0 4px rgba(178,131,29,0.12), var(--shadow-m)}
+.pipe-step.safety .step-no{background:var(--yellow)}
+.pipe-arrow{display:flex;justify-content:center;color:var(--ink-mute);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+
+/* Safety grid */
+.safety{margin-top:20px;display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:760px){.safety{grid-template-columns:1fr 1fr}}
+.rule{
+  background:var(--elev);border:1px solid var(--rule);border-radius:9px;padding:18px 22px 18px 24px;
+  position:relative;overflow:hidden;box-shadow:var(--shadow-s);
+  transition:transform 150ms var(--ease), box-shadow 150ms var(--ease), border-color 150ms var(--ease);
+}
+.rule:hover{transform:translateY(-1px);box-shadow:var(--shadow-m);border-color:var(--rule-strong)}
+.rule::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:9px 0 0 9px}
+.rule.pink::before{background:var(--pink)}
+.rule.yellow::before{background:var(--yellow)}
+.rule.green::before{background:var(--green)}
+.rule .id{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-mute);font-weight:600}
+.rule .name{font-family:'Inter',sans-serif;font-weight:600;font-size:17px;color:var(--ink);margin-top:5px;letter-spacing:-0.005em}
+.rule .desc{font-size:14.5px;line-height:1.6;color:var(--ink-soft);margin-top:10px}
+
+/* Outreach */
+.outreach{margin-top:20px;display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:760px){.outreach{grid-template-columns:1fr 1fr 1fr}}
+.contact{
+  background:var(--elev);border:1px solid var(--rule);border-radius:9px;padding:20px 22px;box-shadow:var(--shadow-s);
+  transition:transform 150ms var(--ease), box-shadow 150ms var(--ease), border-color 150ms var(--ease);
+}
+.contact:hover{transform:translateY(-1px);box-shadow:var(--shadow-m);border-color:var(--rule-strong)}
+.contact .org{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.contact .who{font-family:'Fraunces',serif;font-weight:400;font-size:20px;color:var(--ink);margin-top:6px;line-height:1.25;font-variation-settings:"opsz" 144}
+.contact .role{font-family:'Inter',sans-serif;font-size:14px;color:var(--ink-soft);margin-top:6px;line-height:1.5}
+.contact .status{
+  margin-top:14px;display:inline-flex;align-items:center;gap:8px;
+  padding:5px 10px;border-radius:5px;
+  background:var(--accent-soft);color:var(--accent);
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;font-weight:700;
+}
+.contact .status::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+/* Run locally code */
+.code-wrap{position:relative;margin-top:20px}
+.code{
+  background:#0F1218;color:#D8DDE6;border-radius:11px;padding:24px 26px;
+  font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.8;overflow-x:auto;
+  box-shadow:var(--shadow-l), 0 0 0 1px rgba(0,61,114,0.20);
+  position:relative;
+}
+.code::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+}
+.code .c{color:#7B879A}
+.code .a{color:#7DB8FF}
+.code .b{color:#F2C76A}
+.code .g{color:#7FCB8F}
+
+/* Disclaimer banner */
+.disclaimer{
+  margin-top:48px;padding:14px 18px;border-radius:8px;
+  background:var(--surface);border:1px solid var(--rule);
+  font-size:13.5px;line-height:1.55;color:var(--ink-soft);
+  font-family:'Inter',sans-serif;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.disclaimer .ico{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;
+  background:var(--yellow);color:#fff;display:grid;place-items:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;
+  box-shadow:0 0 0 4px rgba(183,132,27,0.15);
+}
+.disclaimer strong{color:var(--ink);font-weight:600}
+
+/* Footer */
+.foot{
+  margin-top:96px;padding-top:20px;border-top:1px solid var(--rule);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:18px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.04em;color:var(--ink-mute);
+  line-height:1.6;
+}
+.foot a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--rule);transition:color 150ms var(--ease), border-color 150ms var(--ease)}
+.foot a:hover{color:var(--accent);border-color:var(--accent)}
+.foot a:focus-visible{outline:none;box-shadow:var(--focus);border-radius:2px}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(10px);transition:opacity 600ms var(--ease-out), transform 600ms var(--ease-out)}
+.reveal.in{opacity:1;transform:none}
+.reveal:nth-child(2){transition-delay:60ms}
+.reveal:nth-child(3){transition-delay:120ms}
+.reveal:nth-child(4){transition-delay:180ms}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important}
+  .reveal{opacity:1;transform:none}
+}
+
+/* Skip to content (accessibility) */
+.skip{
+  position:absolute;left:-9999px;top:8px;
+  background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  text-decoration:none;z-index:100;
+}
+.skip:focus{left:24px}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+
+  <header class="bar">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">PT</span>
+      <span class="name">PocketTriage</span>
+      <span class="ver">v0.1 · 2026.05</span>
+    </div>
+    <nav aria-label="Primary">
+      <a href="#evidence">01 · Evidence</a>
+      <a href="#architecture">02 · Architecture</a>
+      <a href="#safety">03 · Safety</a>
+      <a href="#distribution">04 · Distribution</a>
+      <a href="https://github.com/yonkoo11/pockettriage">Source ↗</a>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <span class="kicker"><span class="num">00 ·</span> Decision support · Health &amp; Sciences · Apache 2.0</span>
+        <h1 class="h1">A WHO IMCI paediatric triage assistant that runs on the device.</h1>
+        <p class="lede">Community health workers in low-connectivity settings type the symptoms. Gemma 4 on-device returns the IMCI tier and a structured referral pathway. A non-bypassable safety layer catches general danger signs even when the model is wrong. Nothing leaves the device.</p>
+
+        <p class="byline">
+          <span>Mustapha Alex · Medical intern, Nigeria</span>
+          <span>Submitted to the Gemma 4 Good Hackathon</span>
+          <span>May 2026</span>
+        </p>
+
+        <div class="stamps" aria-label="Project facts">
+          <span class="stamp apache"><span class="dot"></span>Apache 2.0</span>
+          <span class="stamp gemma"><span class="dot"></span>Gemma 4 · on-device</span>
+          <span class="stamp gate"><span class="dot"></span>Phase 1 Gate · 4 / 4</span>
+        </div>
+
+        <div class="specrow" aria-label="Verified evidence">
+          <div class="spec"><div class="label">IMCI scenarios</div><div class="val">4<span class="unit">/4 PASS</span></div></div>
+          <div class="spec"><div class="label">Network packets</div><div class="val">0<span class="unit">non-localhost</span></div></div>
+          <div class="spec"><div class="label">Safety tests</div><div class="val">17<span class="unit">passing</span></div></div>
+          <div class="spec"><div class="label">Latency · M-series</div><div class="val">9.8<span class="unit">s median</span></div></div>
+        </div>
+
+        <div class="actions">
+          <a class="btn primary" href="https://huggingface.co/spaces/yonko11/pockettriage">Try a real triage<span class="arrow">→</span></a>
+          <a class="btn ghost" href="https://github.com/yonkoo11/pockettriage">Read the source<span class="arrow">→</span></a>
+        </div>
+      </div>
+
+      <!-- Hero device readout -->
+      <div class="device reveal">
+        <header>
+          <div class="lbl"><span class="seal-mini" aria-hidden="true">S1</span>Case · severe pneumonia</div>
+          <div class="right"><span class="dot" aria-hidden="true"></span>Airplane mode · 0 packets</div>
+        </header>
+        <div class="case">
+          <span class="k">PATIENT</span>  11-month-old boy.<br>Cough for 3 days. Breathing 58/min.<br>Chest is sucking in. Restless and refusing to drink.
+        </div>
+        <div class="out">
+          <div class="tier-band">
+            <div class="left"><span class="top">Tier</span><span class="big">PINK</span></div>
+            <div class="right"><p class="pathway"><strong>Refer urgently.</strong> Give first dose of injectable ampicillin + gentamicin (or oral amoxicillin if no injectable available). Transport to the nearest hospital immediately.</p></div>
+          </div>
+          <div class="reasoning">
+            <span class="key">section</span>      <span class="v">Section 2 · severe pneumonia / very severe disease</span><br>
+            <span class="key">danger_signs</span> <span class="v">{ chest_indrawing: true, refusing_to_drink: true }</span><br>
+            <span class="key">confidence</span>   <span class="v">1.00</span>   <span class="key">safety_overrides</span> <span class="v">none</span>
+          </div>
+        </div>
+        <footer>
+          <span>backend = ollama → gemma4:e2b · 5.1 B · Q4_K_M</span>
+          <span>latency = 10.6 s</span>
+        </footer>
+      </div>
+    </section>
+
+    <!-- EVIDENCE -->
+    <section id="evidence" class="section">
+      <div class="section-head">
+        <div class="left">
+          <span class="tag"><span class="num">01 ·</span> Evidence</span>
+          <h2 class="h2">Four canonical IMCI scenarios. Wi-Fi off. tcpdump running.</h2>
+          <p class="sub">Scenarios drawn from the WHO IMCI Chart Booklet 2014. The product was gated on this verifiable airplane-mode test before any polish work.</p>
+        </div>
+        <div class="meta">eval/airplane-test-log.md</div>
+      </div>
+      <table class="tbl">
+        <thead><tr><th style="width:7%">#</th><th style="width:46%">Scenario</th><th>Expected</th><th>Actual</th><th>Latency</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>S1</td><td>Severe pneumonia · chest indrawing + refusing to drink</td><td><span class="tier-pill pink"><span class="g"></span>PINK</span></td><td><span class="tier-pill pink"><span class="g"></span>PINK</span></td><td>10.6 s</td><td class="pass-cell">PASS</td></tr>
+          <tr><td>S2</td><td>Some dehydration · diarrhoea + restless + sunken eyes + slow skin pinch</td><td><span class="tier-pill yellow"><span class="g"></span>YELLOW</span></td><td><span class="tier-pill yellow"><span class="g"></span>YELLOW</span></td><td>10.7 s</td><td class="pass-cell">PASS</td></tr>
+          <tr><td>S3</td><td>Uncomplicated malaria · RDT-positive fever, no danger signs</td><td><span class="tier-pill yellow"><span class="g"></span>YELLOW</span></td><td><span class="tier-pill yellow"><span class="g"></span>YELLOW</span></td><td>9.3 s</td><td class="pass-cell">PASS</td></tr>
+          <tr><td>S4</td><td>Cough or cold · cough + drinking well + no chest indrawing</td><td><span class="tier-pill green"><span class="g"></span>GREEN</span></td><td><span class="tier-pill green"><span class="g"></span>GREEN</span></td><td>8.4 s</td><td class="pass-cell">PASS</td></tr>
+        </tbody>
+      </table>
+      <div class="airplane-proof"><span class="lt">tcpdump</span><span>$ wc -l /tmp/airplane-net.log &nbsp;→&nbsp; 0 &nbsp;//&nbsp; zero non-localhost packets across the entire run</span></div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture" class="section">
+      <div class="section-head">
+        <div class="left">
+          <span class="tag"><span class="num">02 ·</span> Architecture</span>
+          <h2 class="h2">One narrow path. No server. No analytics.</h2>
+          <p class="sub">No fallback to anyone else's cloud. The same JSON output contract is designed for laptop V1 (Ollama, shipped) and Android V2 (LiteRT, roadmap).</p>
+        </div>
+        <div class="meta">infer.py · backends.py · safety.py</div>
+      </div>
+      <div class="pipeline">
+        <div class="pipe-step reveal"><span class="step-no">01 · Input</span><div class="step-title">CHW symptom text (+ optional photo)</div><div class="step-body">In-process. Never persisted to disk; never sent to any network address.</div></div>
+        <div class="pipe-arrow">▼</div>
+        <div class="pipe-step accent reveal"><span class="step-no">02 · Model</span><div class="step-title">Ollama @ 127.0.0.1:11434 → gemma4:e2b · 5.1 B · Q4_K_M</div><div class="step-body">Native gemma4 architecture in Ollama ≥ 0.23.1. Avoids the iSWA-attention bug present in older llama-cpp GGUF distributions.</div></div>
+        <div class="pipe-arrow">▼</div>
+        <div class="pipe-step reveal"><span class="step-no">03 · Parse</span><div class="step-title">_extract_first_json · _validate_shape</div><div class="step-body">Tolerant JSON coercion with a deterministic fallback so malformed model output cannot crash the UI.</div></div>
+        <div class="pipe-arrow">▼</div>
+        <div class="pipe-step safety reveal"><span class="step-no">04 · Safety</span><div class="step-title">safety.apply_safety_layer</div><div class="step-body">R13 danger-sign keyword → force PINK · R14 confidence &lt; 0.4 → append escalation · R15 adult case → refusal · R16 disclaimer banner.</div></div>
+        <div class="pipe-arrow">▼</div>
+        <div class="pipe-step reveal"><span class="step-no">05 · Render</span><div class="step-title">Gradio · tier card + pathway + reasoning + flags</div><div class="step-body">On laptop, served on 127.0.0.1:7860. On Android (roadmap), the same JSON contract renders in a Kotlin native layout via LiteRT.</div></div>
+      </div>
+    </section>
+
+    <!-- SAFETY -->
+    <section id="safety" class="section">
+      <div class="section-head">
+        <div class="left">
+          <span class="tag"><span class="num">03 ·</span> Safety</span>
+          <h2 class="h2">Four invariants. Enforced after the model speaks.</h2>
+          <p class="sub">17 unit tests cover the safety layer (laptop/test_safety.py). PocketTriage treats the classifier as fallible and never lets it have the final word.</p>
+        </div>
+        <div class="meta">laptop/safety.py</div>
+      </div>
+      <div class="safety">
+        <div class="rule pink reveal"><div class="id">R13 · Danger-sign force-PINK</div><div class="name">Override the model when general danger signs appear.</div><div class="desc">Keywords: unable to drink, vomits everything, convulsions, lethargic, unconscious, stiff neck, chest indrawing. Negation-aware: "no chest indrawing" does not fire. The tier is forced to PINK even if the model said GREEN.</div></div>
+        <div class="rule yellow reveal"><div class="id">R14 · Confidence floor</div><div class="name">Escalate every low-confidence case to a human.</div><div class="desc">If the model self-reports confidence &lt; 0.4, "Escalate to medical officer" is appended to the pathway regardless of tier.</div></div>
+        <div class="rule reveal"><div class="id">R15 · Adult refusal</div><div class="name">Adult conditions are out of scope — full stop.</div><div class="desc">Adult-specific terms (chest pain in adult, stroke in adult, pregnancy emergency) trigger a refusal with a referral to adult emergency protocol. Paediatric scope, hard boundary.</div></div>
+        <div class="rule green reveal"><div class="id">R16 · Non-dismissable disclaimer</div><div class="name">The clinical-judgment ribbon is part of the layout.</div><div class="desc">"Decision support based on WHO IMCI 2014. Does NOT replace clinical judgment. Paediatric only (2 months – 5 years)." Always visible. Never closeable.</div></div>
+      </div>
+    </section>
+
+    <!-- DISTRIBUTION -->
+    <section id="distribution" class="section">
+      <div class="section-head">
+        <div class="left">
+          <span class="tag"><span class="num">04 ·</span> Distribution</span>
+          <h2 class="h2">Outreach drafted with named contacts.</h2>
+          <p class="sub">Three letters with full email bodies, shorter LinkedIn / WhatsApp variants, and send-log tables. Sent when the demo URL is green.</p>
+        </div>
+        <div class="meta">outreach/*.md</div>
+      </div>
+      <div class="outreach">
+        <div class="contact reveal"><div class="org">Geneva</div><div class="who">WHO Digital Health &amp; Innovation</div><div class="role">Dr. Alain Labrique · Director, DHI. Backup: Bernardo Mariano Jr.</div><div class="status">Letter drafted</div></div>
+        <div class="contact reveal"><div class="org">New Delhi · Mumbai</div><div class="who">India NHM · ASHA programme</div><div class="role">Smt. Roli Singh, IAS · Add. Secretary &amp; Mission Director. + NHSRC + Maharashtra state Mission Director.</div><div class="status">Letter drafted</div></div>
+        <div class="contact reveal"><div class="org">Abuja · Awka</div><div class="who">Nigerian NPHCDA</div><div class="role">Dr. Muyi Aina · Executive Director NPHCDA. + Anambra SPHCDA + FMoH Coordinating Minister Pate.</div><div class="status">Letter drafted</div></div>
+      </div>
+    </section>
+
+    <!-- RUN LOCALLY -->
+    <section class="section">
+      <div class="section-head">
+        <div class="left">
+          <span class="tag"><span class="num">05 ·</span> Run locally</span>
+          <h2 class="h2">Clean clone to first triage — about fifteen minutes.</h2>
+          <p class="sub">The same code path you see on the live Space, but on your own hardware. No network during inference. On Apple Silicon expect 8–11 seconds per triage.</p>
+        </div>
+        <div class="meta">README.md</div>
+      </div>
+      <div class="code-wrap">
+        <pre class="code"><span class="c"># 1 · Install Ollama (macOS shown · Linux: install.sh from ollama.com)</span>
+brew install ollama
+ollama serve <span class="b">&amp;</span>
+
+<span class="c"># 2 · Pull the model (one-time, ~7 GB)</span>
+ollama pull gemma4:e2b
+
+<span class="c"># 3 · Clone &amp; install</span>
+git clone <span class="a">https://github.com/yonkoo11/pockettriage</span>
+cd pockettriage/laptop
+python3.12 -m venv .venv <span class="b">&amp;&amp;</span> source .venv/bin/activate
+pip install -r requirements.txt
+
+<span class="c"># 4 · Phase 1 Gate · same 4/4 you saw in the evidence table above</span>
+python eval_runner.py     <span class="g"># → 4 / 4 PASS</span>
+
+<span class="c"># 5 · Launch</span>
+python app.py             <span class="c"># → http://127.0.0.1:7860</span></pre>
+      </div>
+    </section>
+
+    <div class="disclaimer">
+      <div class="ico" aria-hidden="true">!</div>
+      <div>
+        <strong>Decision support based on WHO IMCI 2014.</strong>
+        Does <strong>NOT</strong> replace clinical judgment. Paediatric only (2 months – 5 years).
+        Photo input is treated as a supplementary signal; the pathway must always be groundable in the text description alone.
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="foot">
+    <div>
+      <a href="https://github.com/yonkoo11/pockettriage">github.com/yonkoo11/pockettriage</a> &nbsp;·&nbsp;
+      <a href="https://huggingface.co/spaces/yonko11/pockettriage">huggingface.co/spaces/yonko11/pockettriage</a>
+    </div>
+    <div>Mustapha Alex · Medical intern, Nigeria · Apache 2.0 · Gemma 4 weights subject to Google's Gemma Terms</div>
+  </footer>
+</div>
+
+<script>
+const io = new IntersectionObserver((entries)=>{
+  for (const e of entries){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }
+}, {threshold:0.12, rootMargin:"0px 0px -8% 0px"});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

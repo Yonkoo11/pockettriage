@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PocketTriage — clinical brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F8F6F1;
+  --paper-edge:#EFEBE0;
+  --ink:#191614;
+  --ink-soft:#4B4540;
+  --ink-mute:#7C7771;
+  --rule:#E2DCD0;
+  --accent:#A91E2E;
+  --accent-soft:rgba(169,30,46,0.10);
+  --pink:#C9234A;
+  --yellow:#B7841B;
+  --green:#1F6F3A;
+  --shadow-s:0 1px 0 rgba(25,22,20,0.04), 0 1px 2px rgba(25,22,20,0.05);
+  --shadow-m:0 4px 6px -2px rgba(25,22,20,0.05), 0 12px 24px -8px rgba(25,22,20,0.08);
+  --shadow-l:0 20px 40px -20px rgba(25,22,20,0.18), 0 2px 6px rgba(25,22,20,0.06);
+  --ease:cubic-bezier(0.23,1,0.32,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Fraunces',Georgia,serif;
+  font-size:18px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  /* Subtle warm paper noise — invisible alone, visible as a whole */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(169,30,46,0.025), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.08  0 0 0 0 0.05  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-blend-mode:multiply, normal;
+}
+.wrap{
+  max-width:760px;
+  margin:0 auto;
+  padding:64px 32px 96px;
+}
+@media (min-width:900px){.wrap{padding:96px 32px 120px}}
+
+/* Editorial header */
+.masthead{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  border-top:2px solid var(--ink);
+  border-bottom:1px solid var(--rule);
+  padding:14px 0;
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  font-variant-numeric:tabular-nums;
+}
+.masthead .mark{
+  font-family:'Fraunces',serif;
+  font-weight:400;
+  font-size:14px;
+  letter-spacing:0.02em;
+  text-transform:none;
+  color:var(--ink);
+}
+.masthead .meta{display:flex;gap:18px}
+.masthead .meta a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--rule)}
+.masthead .meta a:hover{color:var(--accent);border-color:var(--accent)}
+
+/* Article */
+article > * + *{margin-top:32px}
+
+.kicker{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:11px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-top:48px;
+}
+
+h1.title{
+  font-family:'Fraunces',serif;
+  font-weight:400;
+  font-size:clamp(40px, 6vw, 64px);
+  line-height:1.05;
+  letter-spacing:-0.02em;
+  margin:14px 0 8px;
+  color:var(--ink);
+  font-variation-settings:"opsz" 144;
+}
+.subtitle{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-weight:300;
+  font-size:22px;
+  line-height:1.45;
+  color:var(--ink-soft);
+  max-width:60ch;
+  margin:0;
+}
+.byline{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:13px;
+  color:var(--ink-mute);
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:0.02em;
+}
+.byline span + span{padding-left:20px;border-left:1px solid var(--rule)}
+
+/* Drop-cap abstract */
+.abstract{
+  font-size:21px;
+  line-height:1.55;
+  color:var(--ink);
+  max-width:62ch;
+  border-left:3px solid var(--accent);
+  padding-left:20px;
+  margin-left:0;
+}
+.abstract::first-letter{
+  font-family:'Fraunces',serif;
+  font-weight:400;
+  float:left;
+  font-size:78px;
+  line-height:0.85;
+  padding:6px 10px 0 0;
+  color:var(--ink);
+  font-variation-settings:"opsz" 144;
+}
+
+/* Section headers */
+h2.section{
+  font-family:'Inter',system-ui,sans-serif;
+  font-weight:600;
+  font-size:11px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  border-top:1px solid var(--rule);
+  padding-top:14px;
+  margin-top:64px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+h2.section::before{
+  content:"";
+  display:inline-block;
+  width:14px;
+  height:1px;
+  background:var(--accent);
+}
+h3.head{
+  font-family:'Fraunces',serif;
+  font-weight:400;
+  font-size:30px;
+  line-height:1.2;
+  letter-spacing:-0.015em;
+  margin:12px 0 18px;
+  max-width:30ch;
+}
+p.lead{color:var(--ink-soft);max-width:62ch}
+p.lead + p.lead{margin-top:14px}
+
+/* Evidence card — the real product output, in the hero zone */
+.evidence{
+  margin-top:36px;
+  background:#FCFAF5;
+  border:1px solid var(--rule);
+  border-radius:6px;
+  box-shadow:var(--shadow-m);
+  overflow:hidden;
+}
+.evidence header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 18px;
+  background:var(--paper-edge);
+  border-bottom:1px solid var(--rule);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:11px;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  font-variant-numeric:tabular-nums;
+}
+.evidence header .right{color:var(--ink-soft)}
+.evidence .body{padding:22px 24px 26px}
+.evidence .pat{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  color:var(--ink-mute);
+  margin:0 0 14px;
+  white-space:pre-wrap;
+}
+.tier{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 14px;
+  border-radius:999px;
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:0.04em;
+  color:#fff;
+  background:var(--pink);
+  box-shadow:0 0 0 4px rgba(201,35,74,0.12);
+}
+.tier .dot{width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,0.35)}
+.pathway{
+  margin:14px 0 8px;
+  font-family:'Fraunces',serif;
+  font-size:18px;
+  line-height:1.55;
+  color:var(--ink);
+}
+.reasoning{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:14px;
+  color:var(--ink-mute);
+  line-height:1.55;
+  margin:0;
+}
+.evidence footer{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 18px;
+  border-top:1px dashed var(--rule);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:11px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  font-variant-numeric:tabular-nums;
+}
+.pulse{
+  display:inline-block;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);
+  margin-right:8px;
+  animation:pulse 2.6s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:0.45;transform:scale(0.9)}
+  50%{opacity:1;transform:scale(1.05)}
+}
+
+/* CTA row */
+.cta{
+  display:flex;flex-wrap:wrap;gap:12px;margin-top:28px;
+}
+.cta a{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:14px;
+  letter-spacing:0.02em;
+  font-weight:500;
+  text-decoration:none;
+  padding:11px 18px;
+  border-radius:4px;
+  transition:transform 150ms var(--ease), box-shadow 150ms var(--ease), background 150ms var(--ease);
+}
+.cta a.primary{
+  background:var(--ink);
+  color:var(--paper);
+  box-shadow:0 1px 0 rgba(25,22,20,0.2), 0 6px 14px -6px rgba(25,22,20,0.4);
+}
+.cta a.primary:hover{transform:translateY(-1px);box-shadow:0 1px 0 rgba(25,22,20,0.2), 0 12px 22px -8px rgba(25,22,20,0.45)}
+.cta a.primary:active{transform:translateY(0) scale(0.985);transition-duration:80ms}
+.cta a.ghost{
+  background:transparent;
+  color:var(--ink);
+  border:1px solid var(--ink);
+}
+.cta a.ghost:hover{background:var(--ink);color:var(--paper)}
+
+/* Evidence table */
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-variant-numeric:tabular-nums;
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:14px;
+  margin-top:10px;
+}
+.table th{
+  text-align:left;
+  font-weight:600;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--ink-mute);
+  border-bottom:1px solid var(--ink);
+  padding:10px 12px 8px;
+}
+.table td{
+  padding:14px 12px;
+  border-bottom:1px solid var(--rule);
+  color:var(--ink);
+}
+.table tr:last-child td{border-bottom:1px solid var(--ink)}
+.table .pill{
+  display:inline-block;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.04em;
+  padding:3px 9px;
+  border-radius:999px;
+  color:#fff;
+}
+.pill.pink{background:var(--pink)}
+.pill.yellow{background:var(--yellow)}
+.pill.green{background:var(--green)}
+
+.note{
+  margin-top:12px;
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:13px;
+  color:var(--ink-mute);
+  border-left:2px solid var(--rule);
+  padding-left:12px;
+}
+
+/* Architecture diagram */
+.arch{
+  margin-top:18px;
+  padding:22px 24px;
+  background:#FCFAF5;
+  border:1px solid var(--rule);
+  border-radius:6px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  line-height:1.65;
+  color:var(--ink-soft);
+  white-space:pre-wrap;
+  overflow-x:auto;
+}
+.arch .step{color:var(--ink)}
+.arch .accent{color:var(--accent);font-weight:500}
+
+/* Safety rules */
+.rule-list{margin-top:6px;padding:0;list-style:none}
+.rule-list li{
+  display:grid;
+  grid-template-columns:64px 1fr;
+  gap:18px;
+  padding:16px 0;
+  border-bottom:1px solid var(--rule);
+  align-items:start;
+}
+.rule-list li:last-child{border-bottom:none}
+.rule-list .id{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+  padding-top:4px;
+}
+.rule-list .desc{font-size:17px;line-height:1.55;color:var(--ink)}
+
+/* Outreach */
+.outreach{margin-top:8px}
+.contact{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:18px;
+  padding:14px 0;
+  border-bottom:1px solid var(--rule);
+}
+.contact:last-child{border-bottom:none}
+.contact .who{font-family:'Fraunces',serif;font-size:18px;color:var(--ink)}
+.contact .role{font-family:'Inter',system-ui,sans-serif;font-size:13px;color:var(--ink-mute);margin-top:2px}
+.contact .status{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--ink-soft);
+  align-self:center;
+}
+.contact .status.draft::before{content:"";display:inline-block;width:7px;height:7px;background:var(--yellow);border-radius:50%;margin-right:8px;vertical-align:middle}
+
+/* Run locally code block */
+.code{
+  margin-top:16px;
+  background:#1B1816;
+  color:#E8E1D3;
+  border-radius:6px;
+  padding:20px 22px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  line-height:1.7;
+  overflow-x:auto;
+  box-shadow:var(--shadow-l);
+}
+.code .c{color:#9C9388}
+.code .a{color:#F2C76A}
+
+/* Footer */
+footer.foot{
+  margin-top:96px;
+  padding-top:18px;
+  border-top:2px solid var(--ink);
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:18px;
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:12px;
+  letter-spacing:0.06em;
+  color:var(--ink-mute);
+}
+footer.foot a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--rule)}
+footer.foot a:hover{color:var(--accent);border-color:var(--accent)}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(8px);transition:opacity 600ms var(--ease), transform 600ms var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .pulse{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="mark">PocketTriage</div>
+    <nav class="meta">
+      <a href="https://github.com/yonkoo11/pockettriage">Repository</a>
+      <a href="https://huggingface.co/spaces/yonko11/pockettriage">Live demo</a>
+      <span>v0.1 · May 2026</span>
+    </nav>
+  </header>
+
+  <article>
+    <div class="kicker">Decision support · Health &amp; Sciences · Apache 2.0</div>
+    <h1 class="title">An offline WHO IMCI triage assistant for community health workers.</h1>
+    <p class="subtitle">Gemma 4 runs entirely on the device. The chart booklet on the wall, now in the worker's pocket — without the network.</p>
+
+    <p class="byline">
+      <span>Mustapha Alex · Medical intern, Nigeria</span>
+      <span>Submitted to the Gemma 4 Good Hackathon</span>
+      <span>17 May 2026</span>
+    </p>
+
+    <p class="abstract">
+      Community health workers in Anambra, Maharashtra, and similar low-connectivity geographies use the WHO Integrated Management of Childhood Illness protocol every day. The protocol works; cross-referencing a paper booklet under time pressure does not. PocketTriage is the protocol as a fast, deterministic on-device tool — paediatric symptom in, Pink / Yellow / Green tier and a structured referral pathway out, with a non-bypassable safety layer that catches general danger signs even when the model is wrong. Nothing leaves the device.
+    </p>
+
+    <div class="cta">
+      <a class="primary" href="https://huggingface.co/spaces/yonko11/pockettriage">Try a real IMCI scenario →</a>
+      <a class="ghost" href="https://github.com/yonkoo11/pockettriage">Read the source</a>
+    </div>
+
+    <!-- Evidence card: the actual product output -->
+    <div class="evidence reveal">
+      <header>
+        <span>Triage output · S1 severe pneumonia</span>
+        <span class="right"><span class="pulse"></span>Airplane mode · 0 packets observed</span>
+      </header>
+      <div class="body">
+        <p class="pat">11-month-old boy. Cough for 3 days. Breathing 58/min. Chest is sucking in. Restless and refusing to drink.</p>
+        <span class="tier"><span class="dot"></span>PINK — Severe / Refer urgently</span>
+        <p class="pathway">Give first dose of injectable ampicillin + gentamicin (or oral amoxicillin if no injectable available). Refer urgently to nearest hospital.</p>
+        <p class="reasoning">General danger signs present — chest indrawing + refusing to drink. Section 2, Severe pneumonia or very severe disease. Model confidence 1.00; no safety override required.</p>
+      </div>
+      <footer>
+        <span>Backend · Ollama → gemma4:e2b</span>
+        <span>Container latency · 10.6 s (Apple Silicon)</span>
+      </footer>
+    </div>
+
+    <h2 class="section">Evidence — Phase 1 Gate</h2>
+    <h3 class="head">Four canonical IMCI scenarios. Wi-Fi off, cellular off, tcpdump running.</h3>
+    <p class="lead">The product was gated on a verifiable airplane-mode test before any polish work. Scenarios are drawn directly from the WHO IMCI Chart Booklet 2014.</p>
+
+    <table class="table">
+      <thead>
+        <tr><th>Scenario</th><th>Expected</th><th>Actual</th><th>Latency</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>S1 — severe pneumonia (chest indrawing + refusing to drink)</td><td><span class="pill pink">PINK</span></td><td><span class="pill pink">PINK</span></td><td>10.6 s</td></tr>
+        <tr><td>S2 — some dehydration (diarrhoea + restless + sunken eyes + slow skin pinch)</td><td><span class="pill yellow">YELLOW</span></td><td><span class="pill yellow">YELLOW</span></td><td>10.7 s</td></tr>
+        <tr><td>S3 — uncomplicated malaria (RDT-positive fever, no danger signs)</td><td><span class="pill yellow">YELLOW</span></td><td><span class="pill yellow">YELLOW</span></td><td>9.3 s</td></tr>
+        <tr><td>S4 — cough or cold (cough + drinking well + no chest indrawing)</td><td><span class="pill green">GREEN</span></td><td><span class="pill green">GREEN</span></td><td>8.4 s</td></tr>
+      </tbody>
+    </table>
+    <p class="note"><code>wc -l /tmp/airplane-net.log → 0</code>. No packet captured to any address outside 127.0.0.1 or ::1 during the run. Verification log: <code>eval/airplane-test-log.md</code>.</p>
+
+    <h2 class="section">Architecture</h2>
+    <h3 class="head">A single, narrow path — no server, no analytics, no fallback to anyone else's cloud.</h3>
+    <div class="arch"><span class="step">CHW symptom text  (+ optional photo)</span>
+       │
+       ▼
+    <span class="step">infer.py</span>  builds WHO-IMCI-grounded chat
+       │
+       ▼
+    <span class="accent">Ollama on 127.0.0.1:11434</span>   →   <span class="step">gemma4:e2b   (5.1 B, Q4_K_M)</span>
+       │
+       ▼  raw model output (string)
+    <span class="step">_extract_first_json</span>  +  <span class="step">_validate_shape</span>      → tolerant JSON coerce
+       │
+       ▼  { tier, pathway, reasoning, confidence }
+    <span class="accent">safety.apply_safety_layer</span>
+       R13 · danger-sign keyword → force Pink
+       R14 · confidence &lt; 0.4   → append "Escalate to medical officer"
+       R15 · adult case          → refusal
+       │
+       ▼
+    <span class="step">Gradio renders tier card + pathway + reasoning + flags</span></div>
+
+    <h2 class="section">Safety</h2>
+    <h3 class="head">Four invariants that the model cannot override.</h3>
+    <p class="lead">PocketTriage treats the classifier as a powerful but fallible signal. The safety layer enforces these rules <em>after</em> the model speaks. 17 unit tests cover the layer (<code>laptop/test_safety.py</code>).</p>
+    <ul class="rule-list">
+      <li><span class="id">R13 · Pink</span><span class="desc">If the symptom or reasoning text contains any WHO IMCI general danger sign (unable to drink, vomits everything, convulsions, lethargic, unconscious, stiff neck, chest indrawing), the tier is forced to PINK even if the model said GREEN. Negation-aware: "no chest indrawing" does not fire.</span></li>
+      <li><span class="id">R14 · Floor</span><span class="desc">If model confidence &lt; 0.4, the pathway gains "Escalate to medical officer" regardless of tier. Low-confidence cases never bypass a human.</span></li>
+      <li><span class="id">R15 · Adult</span><span class="desc">Adult-specific terms (chest pain in adult, stroke in adult, pregnancy emergency) return a Refused result with referral to adult emergency protocol. Paediatric scope, hard boundary.</span></li>
+      <li><span class="id">R16 · Banner</span><span class="desc">A non-dismissable banner — "Decision support based on WHO IMCI 2014. Does NOT replace clinical judgment. Paediatric only (2 months – 5 years)" — renders as part of the layout, not as a closeable popup.</span></li>
+    </ul>
+
+    <h2 class="section">Distribution</h2>
+    <h3 class="head">Outreach, drafted before submission. Sent when the demo URL is green.</h3>
+    <p class="lead">PocketTriage is meant to be adopted, not sold. Three named-contact letters with full bodies are in <code>outreach/</code> in the repository.</p>
+    <div class="outreach">
+      <div class="contact"><div><div class="who">WHO Digital Health &amp; Innovation</div><div class="role">Dr. Alain Labrique · Director, DHI · Geneva</div></div><div class="status draft">Letter drafted</div></div>
+      <div class="contact"><div><div class="who">India NHM / ASHA programme</div><div class="role">Smt. Roli Singh, IAS · Add. Secretary &amp; Mission Director · New Delhi (+ NHSRC, Maharashtra)</div></div><div class="status draft">Letter drafted</div></div>
+      <div class="contact"><div><div class="who">Nigerian NPHCDA</div><div class="role">Dr. Muyi Aina · Executive Director · Abuja (+ Anambra SPHCDA)</div></div><div class="status draft">Letter drafted</div></div>
+    </div>
+
+    <h2 class="section">Run locally</h2>
+    <h3 class="head">Clean clone to first triage: about fifteen minutes.</h3>
+    <pre class="code"><span class="c"># 1. Install Ollama (macOS shown)</span>
+brew install ollama
+ollama serve &amp;
+
+<span class="c"># 2. Pull the model (one-time, ~7 GB)</span>
+ollama pull gemma4:e2b
+
+<span class="c"># 3. Run PocketTriage</span>
+git clone https://github.com/yonkoo11/pockettriage
+cd pockettriage/laptop
+python3.12 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+
+<span class="c"># 4. Verify Phase 1 Gate on the four canonical IMCI scenarios</span>
+python eval_runner.py
+
+<span class="c"># 5. Launch the UI</span>
+python app.py   <span class="c"># → http://127.0.0.1:7860</span></pre>
+
+    <footer class="foot">
+      <div>
+        <a href="https://github.com/yonkoo11/pockettriage">github.com/yonkoo11/pockettriage</a> ·
+        <a href="https://huggingface.co/spaces/yonko11/pockettriage">huggingface.co/spaces/yonko11/pockettriage</a>
+      </div>
+      <div>Apache 2.0 · Gemma 4 weights subject to Google's Gemma Terms</div>
+    </footer>
+  </article>
+</div>
+
+<script>
+const io = new IntersectionObserver((entries)=>{
+  for (const e of entries){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }
+}, {threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
