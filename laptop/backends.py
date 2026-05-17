@@ -51,11 +51,14 @@ class OllamaBackend:
         self,
         model_tag: str = "gemma4:e2b",
         url: str = "http://127.0.0.1:11434/api/chat",
-        timeout: float = 180.0,
+        timeout: float | None = None,
     ):
         self.model_tag = model_tag
         self.url = url
-        self.timeout = timeout
+        # 8-minute default leaves room for CPU-only inference (HF Space free tier).
+        # Override per-deploy with POCKETTRIAGE_OLLAMA_TIMEOUT_S.
+        env_timeout = os.environ.get("POCKETTRIAGE_OLLAMA_TIMEOUT_S")
+        self.timeout = timeout if timeout is not None else float(env_timeout or "480")
 
     def generate(
         self,
@@ -69,6 +72,10 @@ class OllamaBackend:
         if image_b64:
             user_msg["images"] = [image_b64]
 
+        # Keep the model resident between calls so the second triage isn't a cold
+        # 30-second load. 24h is the value Ollama treats as "always-on".
+        keep_alive = os.environ.get("POCKETTRIAGE_OLLAMA_KEEP_ALIVE", "24h")
+
         payload = {
             "model": self.model_tag,
             "messages": [
@@ -76,13 +83,16 @@ class OllamaBackend:
                 user_msg,
             ],
             "stream": False,
+            "keep_alive": keep_alive,
             # Gemma 4 splits output into thinking + content channels. For JSON
             # extraction we want only the answer channel.
             "think": False,
             "options": {
                 "temperature": 0.2,
                 "top_p": 0.9,
-                "num_predict": 400,
+                # Output is a short JSON object; 200 tokens covers it. Lower than
+                # this risks truncating the pathway, higher just wastes CPU.
+                "num_predict": int(os.environ.get("POCKETTRIAGE_OLLAMA_NUM_PREDICT", "200")),
             },
         }
 
