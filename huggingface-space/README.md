@@ -37,6 +37,8 @@ Built for: The Gemma 4 Good Hackathon (Google DeepMind, May 2026), Health & Scie
 
 The Space takes 5–10 minutes on first start to pull the 7 GB model file. Subsequent boots are fast (~30 s). If the model is still pulling when you load the page, you will see "Model unavailable: Ollama not reachable" — refresh after a minute.
 
-## Latency
+## Latency — measured, not estimated
 
-CPU-only HF Spaces are slower than the laptop / Apple Silicon target. Expect 30–60 s per inference on the Space versus 8–11 s on a Mac. The product is built for laptop + Android; the Space is a courtesy demo.
+This Space runs on `cpu-basic` (2 vCPU, no GPU). End-to-end probe on 2026-05-17 with the S1 "severe pneumonia" canonical scenario returned the correct **PINK — Refer Urgently** tier with the correct WHO IMCI pathway in **534 seconds (~9 minutes)**. After the first call the model stays resident (`OLLAMA_KEEP_ALIVE=24h`); the second call is faster but still in the same order of magnitude.
+
+The product is built for Apple Silicon laptops (8–11 s per triage on M-series) and Android phones via LiteRT. The Space is a courtesy demo so reviewers can verify the IMCI classifier behaviour in a browser — **for fast eval, run locally** following the GitHub README. A clean clone to first triage is about 15 minutes.

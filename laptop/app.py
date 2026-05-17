@@ -41,6 +41,18 @@ DISCLAIMER = (
     "Paediatric only (2 months – 5 years).**"
 )
 
+# Set by the HF Space Dockerfile so we can show a "this is the slow shared demo" notice.
+# Local runs on Apple Silicon return in 8–11 s; the CPU-only HF Space takes 8–10 min per
+# triage. The notice exists so a reviewer doesn't think the UI is broken while waiting.
+ON_HF_SPACE = bool(os.environ.get("SPACE_ID")) or os.environ.get("GRADIO_SERVER_NAME") == "0.0.0.0"
+SPACE_LATENCY_NOTICE = (
+    "> ⏱  **Shared-CPU demo notice.** This Hugging Face Space runs on 2 vCPU with no GPU. "
+    "Each triage takes about **8–10 minutes** because Gemma 4 E2B (5 B parameters) runs "
+    "entirely on the container's CPU. The product is built for Apple Silicon laptops "
+    "(~10 s) and Android phones via LiteRT. For fast eval, follow the README to run "
+    "locally — it takes about 15 minutes from a clean clone."
+)
+
 EXAMPLE_INPUTS = [
     "11-month-old boy. Cough for 3 days. Breathing 58/min. Chest is sucking in. Restless and refusing to drink.",
     "2-year-old girl. Watery diarrhoea for 2 days, ~6 stools/day, no blood. Restless and irritable. Eyes slightly sunken. Drinks eagerly. Skin pinch slow.",
@@ -130,8 +142,10 @@ def build_ui() -> gr.Blocks:
         gr.Markdown("# PocketTriage")
         gr.Markdown(
             "Offline WHO IMCI triage for community health workers. "
-            "Runs Gemma 4 E4B locally — no internet required."
+            "Runs Gemma 4 E2B/E4B locally — no internet required."
         )
+        if ON_HF_SPACE:
+            gr.Markdown(SPACE_LATENCY_NOTICE)
         gr.Markdown(DISCLAIMER)
         with gr.Row():
             with gr.Column(scale=1):
