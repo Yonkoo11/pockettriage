@@ -8,6 +8,7 @@
 ![license](https://img.shields.io/badge/license-Apache%202.0-green)
 ![runtime](https://img.shields.io/badge/runtime-Ollama%20%2B%20LiteRT-orange)
 ![tests](https://img.shields.io/badge/safety%20tests-17%20passing-brightgreen)
+[![demo](https://img.shields.io/badge/demo-Hugging%20Face%20Space-yellow)](https://huggingface.co/spaces/yonko11/pockettriage)
 
 PocketTriage helps community health workers (CHWs) triage paediatric patients (2 months – 5 years) using the WHO Integrated Management of Childhood Illness (IMCI) protocol. The CHW enters symptoms and an optional photo. Gemma 4 (E2B / E4B) running on-device returns a traffic-light tier (Pink/Yellow/Green) and a structured referral pathway. Nothing leaves the device.
 
@@ -29,7 +30,7 @@ Cloud LLMs need internet. Patchy 2G is a fact of life in the deployments where I
 | 4 canonical IMCI eval scenarios | ✓ | [`eval/scenarios.json`](eval/scenarios.json) |
 | Phase 1 Gate eval runner | ✓ | [`laptop/eval_runner.py`](laptop/eval_runner.py) |
 | Airplane-mode verification log | ✓ | [`eval/airplane-test-log.md`](eval/airplane-test-log.md) |
-| Hugging Face Space (Docker + Ollama) | Files in repo, deploy pending | [`huggingface-space/`](huggingface-space/) |
+| Hugging Face Space (Docker + Ollama) | ✓ live | https://huggingface.co/spaces/yonko11/pockettriage |
 | Distribution outreach — 3 named contacts | ✓ drafted | [`outreach/`](outreach/) |
 | Kaggle writeup (1,419 words) | ✓ | [`writeup/kaggle-writeup.md`](writeup/kaggle-writeup.md) |
 | Video script + record checklist | ✓ | [`writeup/video-script.md`](writeup/video-script.md) |

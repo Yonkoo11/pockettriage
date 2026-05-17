@@ -41,7 +41,7 @@ The NHM is the central body that funds, trains, and coordinates the ~1 million A
 > 2. Guidance on whether NHSRC's mAdvisor / Kilkari teams would be appropriate technical partners.
 > 3. Permission to translate the README and system prompt into Hindi and Marathi using ASHA-relevant terminology.
 >
-> Live demo: <Hugging Face Space URL — pending Phase 3 deploy>
+> Live demo: https://huggingface.co/spaces/yonko11/pockettriage
 > Source: https://github.com/yonkoo11/pockettriage (Apache 2.0, free for any government use)
 > Built for the Google DeepMind Gemma 4 Good Hackathon (Health & Sciences track).
 >

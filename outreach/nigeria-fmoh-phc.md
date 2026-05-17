@@ -40,7 +40,7 @@ NPHCDA owns the federal primary-healthcare programme and the CHEW workforce. Ana
 > 2. **Permission to pilot** the tool with 5–10 CHEWs in Anambra (I can fund this personally for the pilot) and bring back outcome data.
 > 3. **Guidance** on whether NPHCDA's ICT / digital-health unit is the right counterparty for technical co-development or whether Pate's FMoH digital-health unit should lead.
 >
-> Live demo: <Hugging Face Space URL — pending Phase 3 deploy>
+> Live demo: https://huggingface.co/spaces/yonko11/pockettriage
 > Source: https://github.com/yonkoo11/pockettriage (Apache 2.0)
 > Built for the Google DeepMind Gemma 4 Good Hackathon (Health & Sciences track, May 2026).
 >

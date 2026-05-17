@@ -3,7 +3,7 @@
 **Track:** Health & Sciences Impact (primary) + Ollama Special Tech
 **Pitch:** Offline clinic in pocket.
 **Repo:** https://github.com/yonkoo11/pockettriage
-**Demo:** https://huggingface.co/spaces/yonkoo11/pockettriage (browser verification)
+**Demo:** https://huggingface.co/spaces/yonko11/pockettriage (browser verification)
 **License:** Apache 2.0
 
 ---

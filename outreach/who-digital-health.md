@@ -33,7 +33,7 @@ WHO Digital Health & Innovation is the WHO unit that runs the Digital Health Atl
 > 2. **Digital Health Atlas listing.** PocketTriage meets the criteria for a public-good, open-source classifier. I want to start the registration process.
 > 3. **AI for Health alignment.** The README explicitly references the WHO AI Ethics & Governance Guidance for Health (2021). I would like to confirm I have read it correctly.
 >
-> Live demo: <Hugging Face Space URL — pending Phase 3 deploy>
+> Live demo: https://huggingface.co/spaces/yonko11/pockettriage
 > Source: https://github.com/yonkoo11/pockettriage (Apache 2.0)
 > Submission to Google DeepMind Gemma 4 Good Hackathon under the Health & Sciences track.
 >

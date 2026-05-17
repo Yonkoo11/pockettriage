@@ -27,7 +27,7 @@ Runs before clicking Submit on Kaggle. Every box must be true.
 - [x] writeup/kaggle-writeup.md (1,419 words, under 1500 cap)
 - [x] writeup/video-script.md
 - [ ] writeup/cover-image.png — pending (spec in `writeup/cover-image.md`)
-- [ ] huggingface-space live URL — pending HF auth + push
+- [x] huggingface-space live URL — https://huggingface.co/spaces/yonko11/pockettriage (Docker Space, BUILDING at 16:37 UTC 2026-05-17)
 - [ ] android/ APK build artifact — pending
 
 ## Banned-words scrub
@@ -47,7 +47,7 @@ grep -i -E "(thorough|comprehensive|exhaustive|battle-tested|production-ready|bu
 ## Link-checker
 
 - [x] https://github.com/yonkoo11/pockettriage — returns 200 (verified `gh repo view yonkoo11/pockettriage`)
-- [ ] Hugging Face Space URL — set once deployed
+- [x] Hugging Face Space URL — https://huggingface.co/spaces/yonko11/pockettriage (verify it shows the Gradio UI after build completes; cold boot is 5-10 min)
 - [ ] YouTube unlisted link — set after upload
 - [x] WHO IMCI Chart Booklet (referenced in writeup) — public WHO PDF, current 2014 edition
 - [x] LiteRT artifacts: `litert-community/gemma-4-E4B-it-litert-lm`, `litert-community/gemma-4-E2B-it-litert-lm` — public HF repos
