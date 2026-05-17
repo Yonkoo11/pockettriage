@@ -111,12 +111,13 @@ body::before{
   font-family:'Fraunces',Georgia,serif;
   font-weight:400;
   font-variation-settings:"opsz" 144;
-  font-size:clamp(40px, 5.6vw, 64px);
-  line-height:1.04;
+  font-size:clamp(40px, 5.6vw, 60px);
+  line-height:1.06;
   letter-spacing:-0.022em;
   margin:14px 0 16px;
   color:var(--ink);
-  max-width:18ch;
+  max-width:22ch;
+  text-wrap:balance;
 }
 
 .lede{
@@ -125,13 +126,14 @@ body::before{
 }
 .lede::first-letter{
   font-family:'Fraunces',serif;
-  font-weight:400;
+  font-weight:500;
   float:left;
-  font-size:54px;
-  line-height:0.85;
-  padding:6px 8px 0 0;
+  font-size:62px;
+  line-height:0.82;
+  padding:8px 10px 0 0;
   color:var(--ink);
   font-variation-settings:"opsz" 144;
+  letter-spacing:-0.02em;
 }
 
 .byline{
@@ -156,9 +158,9 @@ body::before{
   color:var(--ink-soft);
   box-shadow:var(--shadow-xs);
 }
-.stamp.apache{border-color:rgba(31,111,58,0.45);color:var(--green);background:#F5FAF6}
-.stamp.gemma{border-color:rgba(0,61,114,0.45);color:var(--accent);background:#F4F8FB}
-.stamp.gate{border-color:rgba(201,35,74,0.45);color:var(--pink);background:#FCF5F7}
+.stamp.apache{border-color:rgba(0,61,114,0.40);color:var(--accent);background:#F4F8FB}
+.stamp.gemma{border-color:rgba(14,17,22,0.30);color:var(--ink);background:#FAFAF7}
+.stamp.gate{border-color:rgba(31,111,58,0.45);color:var(--green);background:#F4F9F5}
 .stamp .dot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.85}
 
 /* Specrow — the "in 5 seconds" evidence block */
@@ -478,7 +480,7 @@ body::before{
     <section class="hero">
       <div>
         <span class="kicker"><span class="num">00 ·</span> Decision support · Health &amp; Sciences · Apache 2.0</span>
-        <h1 class="h1">A WHO IMCI paediatric triage assistant that runs on the device.</h1>
+        <h1 class="h1">Offline WHO IMCI paediatric triage. On the device.</h1>
         <p class="lede">Community health workers in low-connectivity settings type the symptoms. Gemma 4 on-device returns the IMCI tier and a structured referral pathway. A non-bypassable safety layer catches general danger signs even when the model is wrong. Nothing leaves the device.</p>
 
         <p class="byline">
