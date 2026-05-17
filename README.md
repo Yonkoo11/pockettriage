@@ -1,14 +1,17 @@
 # PocketTriage
 
-> Offline clinic in pocket. WHO IMCI triage for community health workers, running Gemma 4 E4B fully on-device.
+![cover](writeup/cover-image.png)
 
-![status](https://img.shields.io/badge/status-v0.1%20Phase%201-blue)
+> Offline clinic in pocket. WHO IMCI triage for community health workers, running Gemma 4 fully on-device.
+
+![status](https://img.shields.io/badge/status-v0.1%20Phase%201%20Gate%20PASS-green)
 ![license](https://img.shields.io/badge/license-Apache%202.0-green)
 ![runtime](https://img.shields.io/badge/runtime-Ollama%20%2B%20LiteRT-orange)
+![tests](https://img.shields.io/badge/safety%20tests-17%20passing-brightgreen)
 
-PocketTriage helps community health workers (CHWs) triage paediatric patients (2 months – 5 years) using the WHO Integrated Management of Childhood Illness (IMCI) protocol. The CHW enters symptoms and an optional photo. Gemma 4 E4B running on-device returns a traffic-light tier (Pink/Yellow/Green) and a structured referral pathway. Nothing leaves the device.
+PocketTriage helps community health workers (CHWs) triage paediatric patients (2 months – 5 years) using the WHO Integrated Management of Childhood Illness (IMCI) protocol. The CHW enters symptoms and an optional photo. Gemma 4 (E2B / E4B) running on-device returns a traffic-light tier (Pink/Yellow/Green) and a structured referral pathway. Nothing leaves the device.
 
-This is the V1 of a real product, not a demo. Apache 2.0, public outreach started, safety layer enforced, full eval suite.
+This is the V1 of a real product, not a demo. Apache 2.0. Distribution outreach to WHO Digital Health, India NHM ASHA, and Nigerian NPHCDA drafted under `outreach/`. Safety layer enforced (R13–R16, 17 unit tests). Phase 1 Gate PASS: 4 / 4 canonical IMCI scenarios with zero outbound packets — see [`eval/airplane-test-log.md`](eval/airplane-test-log.md).
 
 ## Why on-device?
 
@@ -18,15 +21,21 @@ Cloud LLMs need internet. Patchy 2G is a fact of life in the deployments where I
 
 | Component | Status | Path |
 |---|---|---|
-| WHO IMCI protocol encoding | ✓ | `who-imci/protocol-summary.md` |
-| Inference adapter (Ollama HTTP) | ✓ | `laptop/infer.py` |
-| Safety layer (R13–R16) | ✓ | `laptop/safety.py` (17 unit tests passing) |
-| System prompt + JSON output contract | ✓ | `laptop/system_prompt.py`, `laptop/schema.json` |
-| Gradio UI | ✓ | `laptop/app.py` |
-| 4 canonical IMCI eval scenarios | ✓ | `eval/scenarios.json` |
-| Phase 1 Gate eval runner | ✓ | `laptop/eval_runner.py` |
-| Android LiteRT V2 | Phase 3 | `android/` |
-| Distribution outreach | Phase 3 | `outreach/` |
+| WHO IMCI protocol encoding | ✓ | [`who-imci/protocol-summary.md`](who-imci/protocol-summary.md) |
+| Inference adapter (Ollama HTTP) | ✓ | [`laptop/infer.py`](laptop/infer.py) |
+| Safety layer (R13–R16) | ✓ | [`laptop/safety.py`](laptop/safety.py) (17 unit tests passing) |
+| System prompt + JSON output contract | ✓ | [`laptop/system_prompt.py`](laptop/system_prompt.py), [`laptop/schema.json`](laptop/schema.json) |
+| Gradio UI | ✓ | [`laptop/app.py`](laptop/app.py) |
+| 4 canonical IMCI eval scenarios | ✓ | [`eval/scenarios.json`](eval/scenarios.json) |
+| Phase 1 Gate eval runner | ✓ | [`laptop/eval_runner.py`](laptop/eval_runner.py) |
+| Airplane-mode verification log | ✓ | [`eval/airplane-test-log.md`](eval/airplane-test-log.md) |
+| Hugging Face Space (Docker + Ollama) | Files in repo, deploy pending | [`huggingface-space/`](huggingface-space/) |
+| Distribution outreach — 3 named contacts | ✓ drafted | [`outreach/`](outreach/) |
+| Kaggle writeup (1,419 words) | ✓ | [`writeup/kaggle-writeup.md`](writeup/kaggle-writeup.md) |
+| Video script + record checklist | ✓ | [`writeup/video-script.md`](writeup/video-script.md) |
+| Cover image (1920×1080) | ✓ | [`writeup/cover-image.png`](writeup/cover-image.png) |
+| Phase 4.7 communication-pack checklist | ✓ | [`writeup/comm-pack-checklist.md`](writeup/comm-pack-checklist.md) |
+| Android LiteRT V2 | Phase 3 — pending | `android/` |
 
 ## Run locally (≤ 30 minutes from clean clone)
 
@@ -169,12 +178,12 @@ See `CONTRIBUTING.md`. We especially welcome:
 
 ## Distribution
 
-PocketTriage is meant to be adopted, not sold. Outreach started during V1 build:
+PocketTriage is meant to be adopted, not sold. Outreach drafted during V1 build (sent immediately after submission, when there is a live demo URL to share):
 
-- WHO Digital Health Department — `outreach/who-digital-health.md`
-- India NHM ASHA programme — `outreach/india-nhm-asha.md`
-- Nigerian FMoH Primary Healthcare — `outreach/nigeria-fmoh-phc.md`
-- Public Hugging Face Space for laptop V1 — see deploy section in this README
+- WHO Digital Health Department — [`outreach/who-digital-health.md`](outreach/who-digital-health.md) (Dr. Alain Labrique, Geneva)
+- India NHM ASHA programme — [`outreach/india-nhm-asha.md`](outreach/india-nhm-asha.md) (Add. Secretary NHM + Maharashtra state + NHSRC)
+- Nigerian NPHCDA / FMoH — [`outreach/nigeria-fmoh-phc.md`](outreach/nigeria-fmoh-phc.md) (Dr. Muyi Aina + Anambra SPHCDA)
+- Public Hugging Face Space — [`huggingface-space/`](huggingface-space/) (Docker + Ollama; deploys with `hf auth login` + Space push)
 
 ## Built for
 
