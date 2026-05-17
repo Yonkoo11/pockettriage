@@ -22,7 +22,22 @@ phase_3: completed
 selected: hybrid — Proposal 3 base + Proposal 1 serif display & editorial byline + Proposal 2 stamp/badge row
 rationale: P3 has the strongest evidence-forward information hierarchy for hackathon judges (specrow + device readout). P1's Fraunces serif H1 + Submitted-To byline adds editorial credibility for public-health audiences. P2's stamped badge row gives domain-meaningful affordances (Apache 2.0 · Gemma 4 on-device · Phase 1 Gate 4/4).
 
-phase_4: in_progress
+phase_4: completed
+artifact: docs/index.html
+deployed_to: https://yonkoo11.github.io/pockettriage/ (GitHub Pages from master:/docs)
+audit_result: PASS
+issues_fixed: 1 — six 11px font sizes bumped to 12px floor
+
+phase_5: completed
+qa_result: APPROVED
+gates:
+  - liveness: 9 gradients + 9 box-shadows w/ rgba + 2 noise layers (passes 3/3)
+  - font-size floor: 0 sizes below 12px
+  - banned css: 0 'transition: all' or 'scale(0)'
+  - rgba opacity: 0 below 0.03
+  - ai-slop: 0 heroicons, 0 gradient-text, 0 generic CTAs ('Get Started'/'Launch App')
+  - accessibility: skip-link, focus-visible boxes, 44px button min-height, prefers-reduced-motion fallbacks, ARIA labels on nav/hero specrow
+  - http probe: yonkoo11.github.io/pockettriage/ returned 200 with the actual H1
 phase_3: pending
 phase_4: pending
 phase_5: pending

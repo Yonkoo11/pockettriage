@@ -9,6 +9,7 @@
 ![runtime](https://img.shields.io/badge/runtime-Ollama%20%2B%20LiteRT-orange)
 ![tests](https://img.shields.io/badge/safety%20tests-17%20passing-brightgreen)
 [![demo](https://img.shields.io/badge/demo-Hugging%20Face%20Space-yellow)](https://huggingface.co/spaces/yonko11/pockettriage)
+[![site](https://img.shields.io/badge/site-yonkoo11.github.io%2Fpockettriage-blue)](https://yonkoo11.github.io/pockettriage/)
 
 PocketTriage helps community health workers (CHWs) triage paediatric patients (2 months – 5 years) using the WHO Integrated Management of Childhood Illness (IMCI) protocol. The CHW enters symptoms and an optional photo. Gemma 4 (E2B / E4B) running on-device returns a traffic-light tier (Pink/Yellow/Green) and a structured referral pathway. Nothing leaves the device.
 
