@@ -1,8 +1,8 @@
 FROM python:3.12-slim
 
-# System deps
+# System deps. Ollama's installer requires zstd to extract its bundle.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl ca-certificates \
+    curl ca-certificates zstd \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Ollama (native binary)
