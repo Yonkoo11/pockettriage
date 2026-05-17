@@ -35,7 +35,7 @@ Cloud LLMs need internet. Patchy 2G is a fact of life in the deployments where I
 | Video script + record checklist | ✓ | [`writeup/video-script.md`](writeup/video-script.md) |
 | Cover image (1920×1080) | ✓ | [`writeup/cover-image.png`](writeup/cover-image.png) |
 | Phase 4.7 communication-pack checklist | ✓ | [`writeup/comm-pack-checklist.md`](writeup/comm-pack-checklist.md) |
-| Android LiteRT V2 | Phase 3 — pending | `android/` |
+| Android LiteRT V2 | V2 roadmap — NOT in V1 submission ([rationale](ai/sponsor-integration.md)) | `android/` |
 
 ## Run locally (≤ 30 minutes from clean clone)
 

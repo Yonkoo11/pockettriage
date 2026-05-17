@@ -1,6 +1,6 @@
 # PocketTriage — offline WHO IMCI triage on Gemma 4
 
-**Track:** Health & Sciences Impact (primary) + LiteRT Special Tech
+**Track:** Health & Sciences Impact (primary) + Ollama Special Tech
 **Pitch:** Offline clinic in pocket.
 **Repo:** https://github.com/yonkoo11/pockettriage
 **Demo:** https://huggingface.co/spaces/yonkoo11/pockettriage (browser verification)
@@ -22,38 +22,14 @@ PocketTriage is an open-source on-device implementation of the WHO IMCI 2014 pae
 
 Two deployment surfaces:
 
-1. **Laptop V1.** Python + Gradio + Ollama running `gemma4:e2b` on a developer or clinic laptop. Verified airplane-mode operation: tcpdump captured zero non-localhost packets during inference.
-2. **Android V2.** Kotlin + LiteRT (Google AI Edge) loading the `gemma-4-E4B-it.litertlm` artifact from `litert-community` on a target $80 Android phone.
+1. **Laptop V1 (shipped, this submission).** Python + Gradio + Ollama running `gemma4:e2b` on a developer or clinic laptop. Verified airplane-mode operation: tcpdump captured zero non-localhost packets during inference.
+2. **Android V2 (roadmap, NOT in this submission).** Kotlin + LiteRT (Google AI Edge) loading the `gemma-4-E4B-it.litertlm` artifact from `litert-community` on a target $80 Android phone. The artifact is identified and the architecture is wired in `notes/model-source.md` Q2 / Q5, but no APK was built and tested on a real device in V1. The LiteRT track is therefore NOT in the applied-tracks list (see `ai/sponsor-integration.md`).
 
-Same JSON output contract across both surfaces.
+Same JSON output contract designed for both surfaces.
 
 ## Architecture
 
-```
-CHW symptoms + optional photo
-   │
-   ▼
-infer.py: builds chat with WHO IMCI system prompt, sends to backend
-   │
-   ▼
-Backend: Ollama HTTP (laptop) or LiteRT JNI (Android) → Gemma 4 E2B/E4B
-   │
-   ▼ raw model output (string)
-   │
-infer._extract_first_json + _validate_shape: tolerant JSON extraction
-   │
-   ▼ {tier, pathway, reasoning, confidence}
-   │
-safety.apply_safety_layer
-   R13 danger-sign keyword → force Pink
-   R14 confidence < 0.4 → append escalation
-   R15 adult case → refusal
-   │
-   ▼ TriageResult
-Gradio UI renders tier badge + pathway + reasoning + safety flags
-```
-
-No server. No backend. No analytics. No telemetry. No phone-home. The model weights live on the device. The patient description lives in process memory and is discarded at session end.
+CHW symptom text (+ optional photo) → `infer.py` builds the WHO-IMCI-grounded chat → Ollama backend on `127.0.0.1:11434` runs `gemma4:e2b` → raw model output → `_extract_first_json` + `_validate_shape` coerce to `{tier, pathway, reasoning, confidence}` → safety layer (R13–R16) → Gradio renders the tier card. No server. No analytics. No telemetry. Patient text lives in process memory and is discarded at session end.
 
 ## Evidence — Phase 1 Gate
 
@@ -76,9 +52,9 @@ The product was gated on a verifiable airplane-mode test before any polish work.
 
 **Native function calling / structured JSON.** Gemma 4 supports tools and structured output natively. V1 uses a JSON output contract specified in the system prompt rather than the tool-call API, for portability across runtimes (Ollama on laptop, LiteRT on Android, MLX as alternate). The JSON contract is enforced by `_extract_first_json` and `_validate_shape` with a deterministic fallback so a malformed response cannot crash the UI.
 
-**LiteRT (Google AI Edge).** The Android V2 deployment loads `gemma-4-E4B-it.litertlm` from the official `litert-community` Hugging Face org. The chipset-specific variants (`qcs8275`, `sm8750`) match the Snapdragon SoC families on the budget Android segment that CHWs actually carry. LiteRT is load-bearing for the deployment because it is the only sanctioned runtime that ships an Android-native, multimodal, Gemma-4-architecture inference path.
+**Ollama.** V1 laptop runtime. `gemma4` architecture is native in Ollama 0.23.1+, which avoids the iSWA-attention bug present in older `llama-cpp` GGUF distributions of Gemma 4. The Modelfile + Ollama integration is documented in the README; the HF Space deploys Ollama in a Docker container for a clean cross-platform reference. Ollama is load-bearing for V1 — without the native `gemma4` architecture support there is no working laptop deployment path on Apple Silicon today.
 
-**Ollama.** V1 laptop runtime. `gemma4` architecture is native in Ollama 0.23.1+, which avoids the iSWA-attention bug present in older `llama-cpp` GGUF distributions of Gemma 4. The Modelfile + Ollama integration is documented in the README; the Space deploys Ollama in a Docker container for a clean cross-platform reference.
+**LiteRT (Google AI Edge) — V2 roadmap, not in this submission.** The Android deployment loads `gemma-4-E4B-it.litertlm` from the official `litert-community` Hugging Face org; the chipset-specific variants (`qcs8275`, `sm8750`) match the Snapdragon SoC families on the budget Android segment. This path is wired in `notes/model-source.md` Q2 / Q5 but no APK was built and tested on a real device in V1. The LiteRT track is therefore NOT in the applied-tracks list — see `ai/sponsor-integration.md`.
 
 ## Safety design
 
@@ -112,9 +88,9 @@ Each file is a named contact, the rationale, a full email body, and a shorter Li
 
 **Verified:** Phase 1 Gate (4/4 IMCI scenarios, airplane mode, zero network egress), safety layer (17 unit tests), backend abstraction (Ollama path), Gradio UI flow, repo + license + CONTRIBUTING + CODE_OF_CONDUCT.
 
-**Not yet verified at submission time:** Android LiteRT APK on real Tecno-Spark-class hardware (artifact identified, integration in progress); HF Space cold-boot latency (Docker config written, deploy pending); outreach responses (sent post-submission).
+**Not yet verified at submission time:** Android LiteRT APK on real Tecno-Spark-class hardware (artifact + architecture identified; NOT applied for the LiteRT track because no on-device demo); HF Space cold-boot latency (Docker config written, deploy pending); outreach responses (sent post-submission, with the live demo URL).
 
-That is an honest snapshot. The laptop V1 is real. The Android V2 path is wired but not yet on-device-validated. We say so here and in the repo.
+That is an honest snapshot. The laptop V1 is real. The Android V2 path is wired but not yet on-device-validated, and we have explicitly excluded the LiteRT track from this submission because of that. We say so here, in the repo, and in `ai/sponsor-integration.md`.
 
 ## Word count
 

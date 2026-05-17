@@ -87,6 +87,6 @@ grep -i -E "(thorough|comprehensive|exhaustive|battle-tested|production-ready|bu
 - [ ] HF Space rebuild triggered + verified green
 - [ ] YouTube video set to "Unlisted" with the GitHub URL in the description
 - [ ] Kaggle entry fields: title, tagline, GitHub URL, HF Space URL, YouTube URL, cover image upload
-- [ ] Kaggle entry: select Health & Sciences Impact track + LiteRT Special Tech track
-- [ ] Kaggle entry: do NOT select Ollama / Unsloth / Cactus tracks unless Phase 4.5 verification confirms ≥ 4/5 shipped depth
+- [ ] Kaggle entry: select **Main + Health & Sciences Impact + Ollama Special Tech** (per `ai/sponsor-integration.md` Phase 4.5 verification)
+- [ ] Kaggle entry: do **NOT** select LiteRT (no real-device APK in V1), Unsloth (no fine-tune), Cactus (no routing), llama.cpp (architecturally blocked)
 - [ ] Save submission-confirmation.png after the Submit click
