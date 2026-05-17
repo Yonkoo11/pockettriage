@@ -21,17 +21,13 @@ This session:
 
 These three actions require you, because they need your accounts / your face / your finger on the Submit button.
 
-### 1. Publish the live demo (Hugging Face)
+### 1. Live demo (Hugging Face) — ALREADY DONE
 
-The Hugging Face Space code is ready in `huggingface-space/` but not yet on Hugging Face's servers. To deploy it, you log into your Hugging Face account and push the Space. Type this into your terminal:
+Live and verified: https://huggingface.co/spaces/yonko11/pockettriage
 
-```
-! hf auth login
-```
+End-to-end probe on 2026-05-17: the S1 severe-pneumonia scenario returned the correct PINK tier and the correct WHO IMCI severe-pneumonia pathway. Full container latency was 534 seconds (~9 minutes) on the free `cpu-basic` tier — this is the price of running 5 B parameters on 2 vCPU with no GPU. The Space header openly tells visitors so.
 
-(That `!` lets me see the output here.) Paste your Hugging Face token when asked. Token is at https://huggingface.co/settings/tokens — pick one with **write** access.
-
-Once logged in, tell me and I will create the Space and push the files. The Space will take about 5–10 minutes to start (it has to download the model on first boot), then it stays warm.
+**Visit it once in a private window to confirm it loads for you.** If it says "Sleeping" (HF Spaces sleep after 48 h idle on free tier), click "Restart". First call after a sleep adds ~30 s of model reload on top of the inference time.
 
 ### 2. Record the 2-minute video
 

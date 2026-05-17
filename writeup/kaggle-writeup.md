@@ -86,9 +86,9 @@ Each file is a named contact, the rationale, a full email body, and a shorter Li
 
 ## What's verified vs not
 
-**Verified:** Phase 1 Gate (4/4 IMCI scenarios, airplane mode, zero network egress), safety layer (17 unit tests), backend abstraction (Ollama path), Gradio UI flow, repo + license + CONTRIBUTING + CODE_OF_CONDUCT.
+**Verified:** Phase 1 Gate (4/4 IMCI scenarios, airplane mode, zero network egress), safety layer (17 unit tests), backend abstraction, Gradio UI flow, repo metadata, **live HF Space** at https://huggingface.co/spaces/yonko11/pockettriage — end-to-end probe 2026-05-17 returned correct PINK tier + correct severe-pneumonia pathway for S1; 534 s on cpu-basic, openly disclaimed in the Space header.
 
-**Not yet verified at submission time:** Android LiteRT APK on real Tecno-Spark-class hardware (artifact + architecture identified; NOT applied for the LiteRT track because no on-device demo); HF Space cold-boot latency (Docker config written, deploy pending); outreach responses (sent post-submission, with the live demo URL).
+**Not yet verified at submission time:** Android LiteRT APK on real Tecno-Spark-class hardware (artifact + architecture identified; NOT applied for the LiteRT track because no on-device demo); outreach responses (sent post-submission, with the live demo URL).
 
 That is an honest snapshot. The laptop V1 is real. The Android V2 path is wired but not yet on-device-validated, and we have explicitly excluded the LiteRT track from this submission because of that. We say so here, in the repo, and in `ai/sponsor-integration.md`.
 
