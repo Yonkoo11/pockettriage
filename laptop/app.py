@@ -17,6 +17,7 @@ from __future__ import annotations
 import base64
 import io
 import logging
+import os
 
 import gradio as gr
 from PIL import Image
@@ -182,10 +183,12 @@ def build_ui() -> gr.Blocks:
 
 if __name__ == "__main__":
     ui = build_ui()
+    # Default to localhost for the privacy-sensitive on-device run. The HF Space
+    # entrypoint sets GRADIO_SERVER_NAME=0.0.0.0 so the Space proxy can reach
+    # the container; everywhere else this stays bound to loopback.
     ui.queue(max_size=4).launch(
-        server_name="127.0.0.1",
-        server_port=7860,
+        server_name=os.environ.get("GRADIO_SERVER_NAME", "127.0.0.1"),
+        server_port=int(os.environ.get("GRADIO_SERVER_PORT", "7860")),
         show_error=True,
         share=False,
-        # analytics_enabled and telemetry are off by default in recent Gradio
     )
