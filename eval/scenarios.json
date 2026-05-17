@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "WHO IMCI canonical scenarios for PocketTriage eval. Ground truth derived from the WHO IMCI Chart Booklet 2014.",
+  "scenarios": [
+    {
+      "id": "S1-severe-pneumonia",
+      "category": "Cough/difficult breathing",
+      "input": "11-month-old boy. Cough for 3 days. Now breathing fast — I counted 58 breaths in one minute. Chest is sucking in when he breathes. He is restless and refusing to drink.",
+      "expected": {
+        "tier": "Pink",
+        "tier_rationale": "Chest indrawing + general danger sign (refusing to drink) = severe pneumonia or very severe disease per IMCI Section 2.",
+        "pathway_must_contain": ["Refer urgently"],
+        "pathway_should_mention": ["amoxicillin", "ampicillin"]
+      }
+    },
+    {
+      "id": "S2-some-dehydration",
+      "category": "Diarrhoea",
+      "input": "2-year-old girl. Watery diarrhoea for 2 days, around 6 stools per day, no blood. She is restless and irritable, drinks eagerly when offered ORS, eyes look slightly sunken, skin pinch goes back slowly.",
+      "expected": {
+        "tier": "Yellow",
+        "tier_rationale": "Two signs of some dehydration (restless+irritable, eyes sunken, drinks eagerly, skin pinch slow). No general danger sign. IMCI Section 3, Some dehydration.",
+        "pathway_must_contain": ["ORS"],
+        "pathway_should_mention": ["Plan B", "zinc"]
+      }
+    },
+    {
+      "id": "S3-uncomplicated-malaria",
+      "category": "Fever",
+      "input": "4-year-old boy in malaria-endemic region (Anambra, Nigeria). Fever 38.8C for 2 days, RDT positive for P. falciparum. No stiff neck, alert, no general danger signs, no other illness.",
+      "expected": {
+        "tier": "Yellow",
+        "tier_rationale": "Fever + RDT positive, no danger signs, no stiff neck = uncomplicated malaria. IMCI Section 4, Malaria.",
+        "pathway_must_contain": ["artemether-lumefantrine", "AL"],
+        "pathway_should_mention": ["paracetamol", "follow-up"]
+      }
+    },
+    {
+      "id": "S4-cough-cold",
+      "category": "Cough/difficult breathing",
+      "input": "3-year-old girl. Runny nose and cough for 2 days. Breathing rate 32 per minute, no chest indrawing, drinking well, playful, no fever, no other danger signs.",
+      "expected": {
+        "tier": "Green",
+        "tier_rationale": "No fast breathing (threshold 40/min for 12mo–5y), no chest indrawing, no danger signs = cough or cold. IMCI Section 2, No pneumonia.",
+        "pathway_must_contain": ["home care", "continue feeding"],
+        "pathway_should_mention": ["safe remedy", "return if"]
+      }
+    }
+  ]
+}
