@@ -20,10 +20,17 @@ if ! ollama list | awk '{print $1}' | grep -qx "${POCKETTRIAGE_OLLAMA_TAG}"; the
   ollama pull "${POCKETTRIAGE_OLLAMA_TAG}"
 fi
 
-# Sanity ping (warm up model)
-curl -fsS http://127.0.0.1:11434/api/chat \
-  -d "{\"model\":\"${POCKETTRIAGE_OLLAMA_TAG}\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}],\"stream\":false,\"options\":{\"num_predict\":4}}" \
-  > /dev/null || echo "warmup: failed (model may still be loading; UI will retry)"
+# Warm up the model with a real-shaped JSON call so weights are paged in
+# and the first user request doesn't pay the 30-second load cost.
+echo "warmup: generating short JSON to load weights…"
+curl -fsS --max-time 600 http://127.0.0.1:11434/api/chat \
+  -d "{
+    \"model\":\"${POCKETTRIAGE_OLLAMA_TAG}\",
+    \"keep_alive\":\"${POCKETTRIAGE_OLLAMA_KEEP_ALIVE}\",
+    \"messages\":[{\"role\":\"user\",\"content\":\"Reply with only the JSON object {\\\"ok\\\":true} and nothing else.\"}],
+    \"stream\":false,
+    \"options\":{\"num_predict\":24,\"temperature\":0.0}
+  }" > /tmp/warmup.json 2>&1 && echo "warmup ok" || echo "warmup: failed (UI will still try)"
 
 # Launch the Gradio app
 cd /home/user/app/laptop
