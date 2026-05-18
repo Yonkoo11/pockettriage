@@ -44,3 +44,10 @@ venv/
 
 # Local deployment artifacts that may carry operator addresses
 deployments/local-*.json
+
+# Demo video intermediates
+/video/segments/
+/tmp/demo-build/
+/video/audio/
+/video/frames/
+/video/composites/
