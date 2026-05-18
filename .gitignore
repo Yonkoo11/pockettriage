@@ -51,3 +51,4 @@ deployments/local-*.json
 /video/audio/
 /video/frames/
 /video/composites/
+/video/audio/

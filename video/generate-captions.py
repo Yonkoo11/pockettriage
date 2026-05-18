@@ -19,12 +19,12 @@ TARGET_W, TARGET_H = 1920, 1080
 
 # Subtitle text — MUST match VOICEOVER_CLIPS.md and generate-audio.sh verbatim
 CLIPS = {
-    "01-hook":         "Severe pneumonia. WHO IMCI protocol.\nPink. Refer urgently.\nThe model is Gemma 4 on this laptop. Wi-Fi off.",
-    "02-context":      "PocketTriage is the WHO IMCI chart booklet\nas a phone tool. Gemma 4 runs on the device.\nSame protocol. Same action. Faster.",
-    "03-where":        "Anambra State, Nigeria.\nPatchy two-G. Hours without power.\nThis is where the chart booklet still rules.",
-    "04-evidence":     "Four canonical scenarios from the chart booklet.\nWi-Fi off. Tcpdump running.\nFour out of four agree with the WHO protocol. Zero packets.",
-    "05-architecture": "One narrow path. The model runs locally.\nThe patient text never leaves the device.\nNo server. No analytics. No fallback to anyone's cloud.",
-    "06-close":        "PocketTriage.\nBuilt by a Nigerian medical intern.\nOpen source. On GitHub now.",
+    "01-hook":         "Here. Eleven-month-old. Cough. Chest indrawing. Refusing to drink.\nThe model returns Pink, refer urgently. Ten seconds. Wi-Fi is off.",
+    "02-context":      "PocketTriage is the WHO IMCI chart booklet, as a phone tool.\nGemma 4, locally, on Ollama. Same Pink-Yellow-Green tiers. Just faster.",
+    "03-where":        "Why offline. Anambra State, hours without power, two G if you're lucky.\nThe chart booklet on the wall is still the only chart.",
+    "04-evidence":     "Phase one gate. Four canonical IMCI scenarios. Wi-Fi off, tcpdump running.\nFour out of four match the WHO protocol. Zero non-localhost packets.",
+    "05-architecture": "One path. Ollama runs Gemma 4 locally. Patient text never leaves the device.\nA keyword safety layer catches danger signs even when the model misses them.",
+    "06-close":        "PocketTriage. Open source, Apache 2.0.\nBuilt by a Nigerian medical intern. Repo's on GitHub. Take it.",
 }
 
 # Font selection (sans-serif, never monospace)
@@ -61,13 +61,12 @@ def composite_caption(frame_path, text, out_path):
         canvas.paste(img, (x, y))
         img = canvas
 
-    font = get_font(32)
+    # Cleaner, less template-y subtitle: bold white text bottom-center
+    # with a soft drop shadow + a thin accent rule above. No big black box.
+    font = get_font(38)
     lines = text.split("\n")
-    line_height = 42
-    padding = 20
-    margin_x = 160
+    line_height = 50
 
-    # Calculate text block size
     draw = ImageDraw.Draw(img)
     max_line_w = 0
     for line in lines:
@@ -76,35 +75,42 @@ def composite_caption(frame_path, text, out_path):
         max_line_w = max(max_line_w, line_w)
 
     block_h = len(lines) * line_height
-    box_w = max_line_w + padding * 2
-    box_h = block_h + padding * 2
+    block_y = TARGET_H - block_h - 70  # 70px from bottom edge
 
-    # Position at bottom center
-    box_x = (TARGET_W - box_w) // 2
-    box_y = TARGET_H - box_h - 60  # 60px from bottom
-
-    # Draw semi-transparent box
-    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    overlay_draw = ImageDraw.Draw(overlay)
-    overlay_draw.rounded_rectangle(
-        [(box_x, box_y), (box_x + box_w, box_y + box_h)],
-        radius=12,
-        fill=(0, 0, 0, 120),
+    # Soft scrim — narrow horizontal band, very faint, just under the text
+    # block. Keeps text readable over busy frames without the "AI demo box".
+    scrim = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    sd = ImageDraw.Draw(scrim)
+    sd.rectangle(
+        [(0, block_y - 24), (TARGET_W, TARGET_H)],
+        fill=(0, 0, 0, 70),
     )
-    img = Image.alpha_composite(img, overlay)
+    img = Image.alpha_composite(img, scrim)
 
-    # Draw text
+    # Thin accent rule above the text block — anchors it without a box
+    rule = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    rd = ImageDraw.Draw(rule)
+    rule_w = 60
+    rule_x = (TARGET_W - rule_w) // 2
+    rd.rectangle(
+        [(rule_x, block_y - 14), (rule_x + rule_w, block_y - 11)],
+        fill=(0, 61, 114, 235),  # navy accent
+    )
+    img = Image.alpha_composite(img, rule)
+
+    # Render text twice — once as a black shadow (offset 2 px) for legibility,
+    # once as bold white. No background box.
     draw = ImageDraw.Draw(img)
-    text_x = box_x + padding
-    text_y = box_y + padding
     for i, line in enumerate(lines):
-        # Center each line within the box
         bbox = draw.textbbox((0, 0), line, font=font)
         line_w = bbox[2] - bbox[0]
-        lx = box_x + (box_w - line_w) // 2
-        draw.text((lx, text_y + i * line_height), line, font=font, fill=(255, 255, 255, 240))
+        lx = (TARGET_W - line_w) // 2
+        ly = block_y + i * line_height
+        # Multi-direction shadow stack for crisp legibility
+        for dx, dy in [(-2, 0), (2, 0), (0, -2), (0, 2), (2, 2), (-2, -2)]:
+            draw.text((lx + dx, ly + dy), line, font=font, fill=(0, 0, 0, 220))
+        draw.text((lx, ly), line, font=font, fill=(255, 255, 255, 255))
 
-    # Save as RGB PNG
     img.convert("RGB").save(out_path, "PNG")
     print(f"  {out_path.name}")
 

@@ -21,12 +21,12 @@ MODEL="eleven_multilingual_v2"
 
 typeset -A CLIPS
 CLIPS=(
-  [01-hook]="Severe pneumonia. WHO IMCI protocol. Pink. Refer urgently. The model is Gemma 4 on this laptop. Wi-Fi off."
-  [02-context]="PocketTriage is the WHO IMCI chart booklet as a phone tool. Gemma 4 runs on the device. Same protocol. Same action. Faster."
-  [03-where]="Anambra State, Nigeria. Patchy two-G. Hours without power. This is where the chart booklet still rules."
-  [04-evidence]="Four canonical scenarios from the chart booklet. Wi-Fi off. Tcpdump running. Four out of four agree with the WHO protocol. Zero packets."
-  [05-architecture]="One narrow path. The model runs locally. The patient text never leaves the device. No server. No analytics. No fallback to anyone's cloud."
-  [06-close]="PocketTriage. Built by a Nigerian medical intern. Open source. On GitHub now."
+  [01-hook]="Here. Eleven-month-old. Cough. Chest indrawing. Refusing to drink. The model returns Pink, refer urgently. Ten seconds. Wi-Fi is off."
+  [02-context]="PocketTriage is the WHO IMCI chart booklet, as a phone tool. Gemma 4, locally, on Ollama. Same protocol, same Pink-Yellow-Green tiers. Just faster."
+  [03-where]="Why offline. Anambra State, hours without power, two G if you're lucky. The chart booklet on the wall is still the only chart."
+  [04-evidence]="Phase one gate. Four canonical IMCI scenarios. Wi-Fi off, tcpdump running. Four out of four match the WHO protocol. Zero non-localhost packets. Reproducible from the repo."
+  [05-architecture]="One path. Ollama runs Gemma 4 locally. Patient text never leaves the device. No server, no analytics. A keyword safety layer catches danger signs even when the model misses them."
+  [06-close]="PocketTriage. Open source, Apache 2.0. Built by a Nigerian medical intern. Repo's on GitHub. Take it."
 )
 
 CLIP_ORDER=(01-hook 02-context 03-where 04-evidence 05-architecture 06-close)
@@ -46,7 +46,7 @@ for clip in "${CLIP_ORDER[@]}"; do
     -X POST "https://api.elevenlabs.io/v1/text-to-speech/$VOICE_ID" \
     -H "xi-api-key: $ELEVENLABS_API_KEY" \
     -H "Content-Type: application/json" \
-    -d "{\"text\":\"$TEXT\",\"model_id\":\"$MODEL\",\"voice_settings\":{\"stability\":0.82,\"similarity_boost\":0.65,\"style\":0.03}}")
+    -d "{\"text\":\"$TEXT\",\"model_id\":\"$MODEL\",\"voice_settings\":{\"stability\":0.55,\"similarity_boost\":0.65,\"style\":0.15,\"use_speaker_boost\":true}}")
 
   SIZE=$(wc -c < "$OUT" | tr -d ' ')
   if [[ "$HTTP_CODE" != "200" ]] || [[ "$SIZE" -lt 5000 ]]; then
