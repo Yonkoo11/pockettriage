@@ -26,9 +26,9 @@ Gemma 4 runs on the device. Pink / Yellow / Green tier + referral pathway. Nothi
 
 ## 4. Card and Thumbnail Image  (560 × 280)
 
-Upload: **`writeup/card-thumbnail.png`** (already 560 × 280, 24 KB).
+Upload: **`writeup/card-thumbnail.png`** — photoreal (CHEW with phone outside a clinic, PocketTriage typography, PINK tier UI mock), 560 × 280, ~225 KB.
 
-A photoreal alternative is in `writeup/cover-image.md` — paste that prompt into ChatGPT / Gemini / Midjourney if you want to regenerate with real photography. For submission the typographic card above is competition-ready and disambiguates at 120 × 68 thumbnail size.
+Typographic fallback kept at `writeup/card-thumbnail-typographic.png` (24 KB) if Kaggle objects to the photoreal one for any reason (e.g. file-size constraint). Both are 560 × 280.
 
 ## 5. Submission Tracks
 
