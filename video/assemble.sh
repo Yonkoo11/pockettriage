@@ -20,7 +20,7 @@ BREATH=0.3
 VFADE_OUT=0.2
 GAP=0.3
 
-CLIP_ORDER=(01-hook 02-context 03-where 04-evidence 05-architecture 06-close)
+CLIP_ORDER=(01-intro 02-product 03-context 04-evidence 05-architecture 06-close)
 
 echo "Building segments..."
 

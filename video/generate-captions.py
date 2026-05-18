@@ -19,12 +19,12 @@ TARGET_W, TARGET_H = 1920, 1080
 
 # Subtitle text — MUST match VOICEOVER_CLIPS.md and generate-audio.sh verbatim
 CLIPS = {
-    "01-hook":         "Here. Eleven-month-old. Cough. Chest indrawing. Refusing to drink.\nThe model returns Pink, refer urgently. Ten seconds. Wi-Fi is off.",
-    "02-context":      "PocketTriage is the WHO IMCI chart booklet, as a phone tool.\nGemma 4, locally, on Ollama. Same Pink-Yellow-Green tiers. Just faster.",
-    "03-where":        "Why offline. Anambra State, hours without power, two G if you're lucky.\nThe chart booklet on the wall is still the only chart.",
-    "04-evidence":     "Phase one gate. Four canonical IMCI scenarios. Wi-Fi off, tcpdump running.\nFour out of four match the WHO protocol. Zero non-localhost packets.",
-    "05-architecture": "One path. Ollama runs Gemma 4 locally. Patient text never leaves the device.\nA keyword safety layer catches danger signs even when the model misses them.",
-    "06-close":        "PocketTriage. Open source, Apache 2.0.\nBuilt by a Nigerian medical intern. Repo's on GitHub. Take it.",
+    "01-intro":        "PocketTriage — a paediatric triage assistant on Gemma 4, runs on the device.\nCommunity health workers in rural Nigeria, where the internet drops out for days,\nand the only reference is the chart booklet on the wall.",
+    "02-product":      "Worker types the patient's symptoms; the model returns one of three tiers —\nPink, Yellow, Green — plus the pathway from the WHO IMCI protocol.\nSame protocol the worker already follows, just much faster.",
+    "03-context":      "Works completely offline by design.\nPatient text never leaves the device.\nNo server, no analytics, no fallback to anyone else's cloud.",
+    "04-evidence":     "Four canonical IMCI scenarios. Wi-Fi disabled, tcpdump capturing egress.\nAll four match the WHO protocol exactly. Zero non-localhost packets.\nReproducible from the repository.",
+    "05-architecture": "One narrow path. Ollama runs Gemma 4 locally. JSON output validated.\nA keyword safety layer enforces four invariants — including forcing Pink\nwhenever a general danger sign appears, even when the model missed it.",
+    "06-close":        "Open source under Apache 2.0. Built by a Nigerian medical intern.\nRepository is on GitHub. Take a look.",
 }
 
 # Font selection (sans-serif, never monospace)

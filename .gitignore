@@ -52,3 +52,4 @@ deployments/local-*.json
 /video/frames/
 /video/composites/
 /video/audio/
+/video/segments-silent/
