@@ -369,3 +369,101 @@ class TestR17PhotoEscalation:
         assert "R17" not in " ".join(result.safety_flags)
         # No automatic escalation on text-only high-confidence Yellow
         assert "escalate to medical officer" not in result.pathway.lower()
+
+
+class TestMalformedInput:
+    """v0.2 hardening: defensive cases for model outputs that don't follow
+    the JSON schema. None of these should crash; all should produce a
+    TriageResult that errs on the side of safety (escalation appended).
+    """
+
+    def test_empty_pathway(self):
+        result = apply_safety_layer(
+            symptoms="11mo, cough",
+            model_output={
+                "tier": "Green",
+                "pathway": "",  # model returned empty
+                "reasoning": "",
+                "confidence": 0.5,
+            },
+        )
+        # Should still produce something coherent
+        assert result.tier in ("Pink", "Yellow", "Green")
+        assert result.pathway is not None
+
+    def test_unknown_tier_string(self):
+        # Model hallucinates a tier outside the enum
+        result = apply_safety_layer(
+            symptoms="2yo, fever",
+            model_output={
+                "tier": "Magenta",  # not a real IMCI tier
+                "pathway": "Refer.",
+                "reasoning": "Confused.",
+                "confidence": 0.5,
+            },
+        )
+        # Tier passes through but R14 / disclaimer keeps the user safe.
+        # The key guarantee: function does not raise.
+        assert isinstance(result.tier, str)
+
+    def test_negative_confidence(self):
+        # Defensive: confidence somehow comes through as -0.5
+        result = apply_safety_layer(
+            symptoms="any",
+            model_output={
+                "tier": "Yellow",
+                "pathway": "ORS.",
+                "reasoning": "Dehydration.",
+                "confidence": -0.5,
+            },
+        )
+        # Should clamp to [0, 1]
+        assert 0.0 <= result.confidence <= 1.0
+        # Negative confidence is treated as below-floor → R14 should fire
+        assert any("R14" in f for f in result.safety_flags)
+
+    def test_super_high_confidence(self):
+        # confidence=2.0 → clamped
+        result = apply_safety_layer(
+            symptoms="any",
+            model_output={
+                "tier": "Yellow",
+                "pathway": "ORS.",
+                "reasoning": "Dehydration.",
+                "confidence": 2.0,
+            },
+        )
+        assert result.confidence == 1.0
+
+    def test_none_model_output_values(self):
+        # All optional fields are None
+        result = apply_safety_layer(
+            symptoms="11mo, cough",
+            model_output={
+                "tier": "Yellow",
+                "pathway": None,  # type: ignore[dict-item]
+                "reasoning": None,  # type: ignore[dict-item]
+                "confidence": None,  # type: ignore[dict-item]
+            },
+        )
+        # None confidence is treated as low → R14 should fire and
+        # append escalation
+        assert any("R14" in f for f in result.safety_flags)
+
+    def test_extremely_long_symptoms(self):
+        # 10 KB of symptoms text shouldn't crash anything in the safety
+        # layer (the model may truncate; the safety layer is pure-Python
+        # string ops and must handle long inputs gracefully)
+        long = "patient details. " * 600  # ~10 KB
+        result = apply_safety_layer(
+            symptoms=long + " convulsions.",  # danger sign at the end
+            model_output={
+                "tier": "Green",
+                "pathway": "Home care.",
+                "reasoning": "",
+                "confidence": 0.9,
+            },
+        )
+        # R13 should still catch the danger sign even at depth
+        assert result.tier == "Pink"
+        assert any("R13" in f for f in result.safety_flags)
