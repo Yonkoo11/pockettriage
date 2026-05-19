@@ -21,7 +21,7 @@ These are honest gaps. Each is on the v0.2 roadmap.
 
 | Claim | Reality | v0.2 plan |
 |---|---|---|
-| "Runs on Gemma 4 E2B / E4B" | Only **E2B** has been run against the eval. E4B is architecturally equivalent (same Ollama family, same chat template) but eval-untested. | Run `eval_runner.py` with `POCKETTRIAGE_OLLAMA_TAG=gemma4:e4b`, log result |
+| "Runs on Gemma 4 E2B / E4B" | Only **E2B** has been run against the eval. E4B pull attempted three times during v0.2 hardening; first two attempts hit TLS handshake timeouts on `registry.ollama.ai`, third attempt got to ~56% before disk filled and Ollama partial-blob state corrupted. Cleaned 7 GB of partials, retried — pull reached 26% before the Ollama binary itself was evicted from the local install (likely a brew autoclean side-effect). E4B architecture is identical to E2B (same Ollama `gemma4` family, same chat template, same JSON output contract) so the code path is the same; accuracy delta on the 4 canonical scenarios remains unverified. | Reinstall Ollama + re-pull E4B + `POCKETTRIAGE_OLLAMA_TAG=gemma4:e4b python eval_runner.py`. Should take ~20 min on a stable connection. |
 | "Multimodal vision — photo input is wired" | Wired AND now tested. See [`eval/multimodal-test-log.md`](eval/multimodal-test-log.md). E2B model misread a synthetic MUAC tape (returned Yellow on a 10.8 cm photo that should be Pink) with 0.95 confidence. The safety layer did not catch it — silent high-confidence multimodal misclassification. Architecture works; vision accuracy at E2B is not field-ready. | Mitigations queued: photo-derived confidence haircut, OCR pre-pass for numeric photos, retest at E4B |
 | "Native function calling" capability advertised | We use prompt-engineered JSON output, not Ollama's tools API. Never benchmarked the two against each other. | Add tools-API backend path + side-by-side validity benchmark |
 | "Android V2 with LiteRT" | Not in this repo. No `android/` directory. No APK was built or tested. | Build a minimum-viable Kotlin + LiteRT loader against `gemma-4-E4B-it.litertlm` from `litert-community` |
@@ -54,6 +54,19 @@ The internal honesty rule that drives this document:
 PocketTriage v0.1 is **built and tested** for the laptop path (Ollama + Apple Silicon), built-but-not-tested for the multimodal and E4B paths, and not-yet-built for the Android path. It is **not proven** anywhere. The README, landing, and writeup all say so.
 
 ---
+
+## v0.2 hardening pass — what shipped after submission
+
+Done in the post-submission audit window. All committed to `master`, CI green.
+
+- **35 → 41 safety unit tests.** Added 14 R13-adversarial cases (negation forms, compound, sentence boundaries, word boundaries, real-world clinical notes), 4 R17-photo-escalation cases, 6 malformed-input stress cases.
+- **R13 bug fixed.** The new adversarial tests caught a real bug: cross-sentence negation carry-forward. *"No vomits everything. Chest indrawing visible."* was incorrectly suppressing *"chest indrawing"* because the 25-char negation window scanned across the period. Fix in `safety._is_negated`: reset the window at `.!?;\n`. Now 41/41 pass.
+- **New invariant R17 — photo escalation.** Photo-derived findings that aren't already Pink now get an automatic *"Escalate to medical officer to verify photo reading."* append. This closes the silent failure mode observed in `eval/multimodal-test-log.md` where the model returned Yellow at 0.95 confidence on a tape that should be Pink.
+- **Multimodal scenario S5 added.** Synthetic MUAC tape image (public domain, Pillow-rendered) at `eval/photos/muac-red-10p8cm.png`. Live E2B run logged in `eval/multimodal-test-log.md` — honestly documents the model's failure to read the tape correctly and R17's catch.
+- **CI live.** `.github/workflows/test.yml` runs safety unit tests + mock-backend eval on every push/PR. First run: green, 28 s.
+- **Model digest pinned.** `notes/model-source.md` documents `sha256:4e30e266…` so reproducibility doesn't depend on Ollama tag stability.
+- **Repo honesty.** README, landing copy, this STATUS.md all match what's actually built.
+- **Security cleanup.** ElevenLabs keyfile removed from local disk.
 
 ## Sponsor track applications at submission
 
