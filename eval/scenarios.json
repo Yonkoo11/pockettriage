@@ -45,6 +45,18 @@
         "pathway_must_contain": ["home care", "continue feeding"],
         "pathway_should_mention": ["safe remedy", "return if"]
       }
+    },
+    {
+      "id": "S5-malnutrition-muac-photo",
+      "category": "Malnutrition (multimodal)",
+      "input": "2-year-old girl. Mother says child has been less active and not eating well for two weeks. Diarrhoea on and off. CHEW has just taken a MUAC reading — attached photo shows the tape.",
+      "photo": "eval/photos/muac-red-10p8cm.png",
+      "expected": {
+        "tier": "Pink",
+        "tier_rationale": "MUAC photo shows reading 10.8 cm in the RED zone (< 11.5 cm). WHO IMCI: severe acute malnutrition requires referral. IMCI Section 6, Malnutrition + IMCI Section 1, General danger signs.",
+        "pathway_must_contain": ["refer"],
+        "pathway_should_mention": ["severe acute malnutrition", "MUAC", "hospital", "RUTF"]
+      }
     }
   ]
 }

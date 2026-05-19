@@ -50,6 +50,31 @@ Google AI Edge ships LiteRT-LM sample apps via the `google-ai-edge/mediapipe` an
 
 **Decision:** Android V2 will fork the LiteRT-LM Android sample, swap in `gemma-4-E4B-it.litertlm`, and re-implement the chat + multimodal flow against the same JSON output contract used by the laptop V1.
 
+## Model digest pinning (v0.2 hardening, 2026-05-19)
+
+`gemma4:e2b` is an Ollama tag — Ollama can silently re-point a tag. For reproducibility, the actual blob hash at the time this product shipped is:
+
+```
+sha256:4e30e2665218745ef463f722c0bf86be0cab6ee676320f1cfadf91e989107448
+```
+
+That is the model weights blob underneath the `gemma4:e2b` tag on 2026-05-19 on this machine. To pin in production:
+
+```bash
+# Verify the model you're running matches the audit-time blob
+ollama show gemma4:e2b --modelfile | grep "^FROM"
+# Expected: FROM /Users/.../sha256-4e30e2665218745ef463f722c0bf86be0cab6ee676320f1cfadf91e989107448
+
+# If the digest differs, the model was silently updated. Either rebuild eval
+# against the new digest or pull the pinned digest explicitly:
+ollama pull gemma4@sha256:4e30e2665218745ef463f722c0bf86be0cab6ee676320f1cfadf91e989107448
+```
+
+Architecture: `gemma4` (native Ollama family). Parameters: 5.1 B. Quantisation: Q4_K_M.
+Phase 1 Gate 4/4 was verified against this exact digest — see [`eval/airplane-test-log.md`](../eval/airplane-test-log.md).
+
+---
+
 ## Runtime status snapshot (2026-05-17)
 
 | Component | Status | Notes |

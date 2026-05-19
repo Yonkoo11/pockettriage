@@ -116,9 +116,25 @@ class TriageResult:
 
 
 def _is_negated(text_lower: str, keyword_start: int) -> bool:
-    """Return True if a negation phrase precedes the keyword within NEGATION_WINDOW chars."""
+    """Return True if a negation phrase precedes the keyword within NEGATION_WINDOW chars,
+    and no sentence boundary (. ! ?) separates them.
+
+    Bug found by adversarial test 'negation_at_start_does_not_carry_forward':
+    'No vomits everything. Chest indrawing visible.' was incorrectly
+    suppressing 'chest indrawing' because the 25-char window picked up the
+    earlier 'no ', even though a period separates the two clauses.
+    A negation in a previous sentence must not reach forward.
+    """
     window_start = max(0, keyword_start - NEGATION_WINDOW)
     window = text_lower[window_start:keyword_start]
+
+    # If a sentence-ending punctuation appears in the window, only the
+    # text AFTER the last such boundary counts as the negation scope.
+    for boundary in (".", "!", "?", ";", "\n"):
+        idx = window.rfind(boundary)
+        if idx != -1:
+            window = window[idx + 1:]
+
     return any(neg in window for neg in NEGATION_PHRASES)
 
 
@@ -156,8 +172,18 @@ def detect_adult_refusal(text: str) -> list[str]:
 def apply_safety_layer(
     symptoms: str,
     model_output: dict,
+    *,
+    had_photo: bool = False,
 ) -> TriageResult:
-    """Apply R13–R15 to a raw model output."""
+    """Apply R13–R17 to a raw model output.
+
+    R17 (v0.2): if the input included a photo, the model's photo-reading
+    accuracy is not field-verified at E2B (see eval/multimodal-test-log.md).
+    Any non-Pink finding on a photo-bearing call gets an automatic
+    'Escalate to medical officer' append, regardless of confidence.
+    This closes the silent high-confidence-misclassification failure mode
+    observed in S5-malnutrition-muac-photo.
+    """
     flags: list[str] = []
 
     # R15 — adult refusal (highest priority, short-circuits)
@@ -206,6 +232,13 @@ def apply_safety_layer(
         flags.append(f"R14: confidence {confidence:.2f} < {CONFIDENCE_FLOOR} — escalate")
         if "escalate to medical officer" not in pathway.lower():
             pathway = pathway.rstrip(". ") + ". Escalate to medical officer."
+
+    # R17 (v0.2) — photo-derived findings are not E2B-vision-reliable.
+    # Force escalation on any non-Pink classification with a photo present.
+    if had_photo and tier != "Pink":
+        flags.append("R17: photo-derived finding — escalating regardless of confidence")
+        if "escalate to medical officer" not in pathway.lower():
+            pathway = pathway.rstrip(". ") + ". Escalate to medical officer to verify photo reading."
 
     return TriageResult(
         tier=tier,

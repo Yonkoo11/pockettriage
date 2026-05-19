@@ -1,0 +1,43 @@
+name: tests
+
+# All run: steps use literal commands only. No github.event.* inputs
+# are interpolated into shell commands (per the workflow-injection
+# guidance — there's nothing to escape because we don't take any
+# user-controlled input into shells in this workflow).
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  safety-layer:
+    name: safety layer unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: install
+        working-directory: laptop
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: run safety tests (R13 to R16, 31 cases including adversarial)
+        working-directory: laptop
+        run: |
+          python -m pytest test_safety.py -v --tb=short
+
+      - name: verify mock backend still produces correct tier on canonical scenarios
+        working-directory: laptop
+        env:
+          POCKETTRIAGE_BACKEND: mock
+        run: |
+          python eval_runner.py

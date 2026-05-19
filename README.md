@@ -13,7 +13,7 @@
 
 PocketTriage helps community health workers (CHWs) triage paediatric patients (2 months – 5 years) using the WHO Integrated Management of Childhood Illness (IMCI) protocol. The CHW enters symptoms and an optional photo. Gemma 4 (E2B / E4B) running on-device returns a traffic-light tier (Pink/Yellow/Green) and a structured referral pathway. Nothing leaves the device.
 
-This is the V1 of a real product, not a demo. Apache 2.0. Distribution outreach to WHO Digital Health, India NHM ASHA, and Nigerian NPHCDA drafted under `outreach/`. Safety layer enforced (R13–R16, 17 unit tests). Phase 1 Gate PASS: 4 / 4 canonical IMCI scenarios with zero outbound packets — see [`eval/airplane-test-log.md`](eval/airplane-test-log.md).
+This is the V1 of a real product, not a demo. Apache 2.0. Distribution outreach to WHO Digital Health, India NHM ASHA, and Nigerian NPHCDA drafted under `outreach/` — sent immediately after submission (status logged inside each file). Safety layer enforced (R13–R16, 17 unit tests). Phase 1 Gate PASS: 4 / 4 canonical IMCI scenarios with zero outbound packets — see [`eval/airplane-test-log.md`](eval/airplane-test-log.md).
 
 ## Why on-device?
 
@@ -180,7 +180,7 @@ See `CONTRIBUTING.md`. We especially welcome:
 
 ## Distribution
 
-PocketTriage is meant to be adopted, not sold. Outreach drafted during V1 build (sent immediately after submission, when there is a live demo URL to share):
+PocketTriage is meant to be adopted, not sold. Outreach drafted during V1 build (sending now that submission is in and the demo URL is live). See [`STATUS.md`](STATUS.md) for the verified-vs-claimed snapshot.
 
 - WHO Digital Health Department — [`outreach/who-digital-health.md`](outreach/who-digital-health.md) (Dr. Alain Labrique, Geneva)
 - India NHM ASHA programme — [`outreach/india-nhm-asha.md`](outreach/india-nhm-asha.md) (Add. Secretary NHM + Maharashtra state + NHSRC)

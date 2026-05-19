@@ -133,7 +133,7 @@ def triage(symptoms: str, photo_b64: str | None = None) -> TriageResult:
             f"Model output was not valid JSON. Raw: {raw[:200]!r}"
         )
     shaped = _validate_shape(parsed)
-    return apply_safety_layer(symptoms, shaped)
+    return apply_safety_layer(symptoms, shaped, had_photo=photo_b64 is not None)
 
 
 if __name__ == "__main__":

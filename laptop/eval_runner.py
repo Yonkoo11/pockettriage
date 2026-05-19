@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import sys
 import time
@@ -23,6 +24,17 @@ from infer import triage, InferenceError
 
 REPO_ROOT = Path(__file__).parent.parent
 SCENARIOS_PATH = REPO_ROOT / "eval" / "scenarios.json"
+
+
+def _load_photo(scenario: dict[str, Any]) -> str | None:
+    """If the scenario references a photo, load it and return base64 JPEG/PNG data."""
+    rel = scenario.get("photo")
+    if not rel:
+        return None
+    path = REPO_ROOT / rel
+    if not path.exists():
+        return None
+    return base64.b64encode(path.read_bytes()).decode("ascii")
 
 
 def load_scenarios() -> list[dict[str, Any]]:
@@ -63,8 +75,10 @@ def score_one(scenario: dict[str, Any], result_dict: dict[str, Any]) -> dict[str
     }
 
 
-def run_all(verbose: bool = True) -> dict[str, Any]:
+def run_all(verbose: bool = True, only: str | None = None) -> dict[str, Any]:
     scenarios = load_scenarios()
+    if only:
+        scenarios = [s for s in scenarios if s["id"] == only]
     rows: list[dict[str, Any]] = []
     t_total = time.time()
     for sc in scenarios:
@@ -72,8 +86,9 @@ def run_all(verbose: bool = True) -> dict[str, Any]:
             print(f"\n=== {sc['id']} ({sc['category']}) ===", flush=True)
             print(f"input: {sc['input'][:120]}...", flush=True)
         t0 = time.time()
+        photo_b64 = _load_photo(sc)
         try:
-            result = triage(sc["input"])
+            result = triage(sc["input"], photo_b64=photo_b64)
             result_dict = asdict(result)
             row = score_one(sc, result_dict)
             row["latency_s"] = round(time.time() - t0, 2)
@@ -120,9 +135,10 @@ def run_all(verbose: bool = True) -> dict[str, Any]:
 def main() -> int:
     p = argparse.ArgumentParser(description="PocketTriage Phase 1 Gate eval runner")
     p.add_argument("--json", action="store_true", help="machine-readable JSON output")
+    p.add_argument("--only", default=None, help="run only this scenario id (e.g. S5-malnutrition-muac-photo)")
     args = p.parse_args()
 
-    result = run_all(verbose=not args.json)
+    result = run_all(verbose=not args.json, only=args.only)
 
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))
