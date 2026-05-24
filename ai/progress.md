@@ -86,3 +86,25 @@ Open `writeup/comm-pack-checklist.md`. Walk down the list. Every box that says `
 - HF Space will actually run when deployed: **MEDIUM** — Docker config is conventional, but `gemma4:e2b` is 7 GB and the free-tier Space has 16 GB RAM + 2 vCPU; cold-boot may be 10+ minutes; per-inference latency may be 30–60 s. Disclosed in `huggingface-space/README.md`.
 - Outreach will get a response: **LOW** — these are real cold emails to senior people. The fact that the sender is a Nigerian medical intern with a working open-source product helps, but no promises.
 - Submission wins a track: **UNKNOWN** — out of scope of this build session.
+
+---
+
+## 2026-05-24 — E4B local verification attempt
+
+**What Changed (Plain English):** Tried to verify the app works the same on the bigger model (E4B) as it does on the smaller one (E2B). The bigger model downloaded and installed fine, but this laptop has only 8 GB of memory and the model needs more than 10 GB. The model loads but the app freezes the moment it tries to use it. Updated STATUS.md to say the bigger-model claim still hasn't been proven on this hardware and would need a stronger computer or a one-off cloud run to settle.
+
+**What I Did:**
+
+- Reinstalled the Ollama runtime (it had been removed in cleanup).
+- Pulled `gemma4:e4b` (10.5 GB) successfully after one network retry.
+- Sent a 5-token test request directly to the model API — got zero bytes back after 4 minutes (model is page-thrashing on 8 GB RAM).
+- Ran the eval scenarios — every scenario killed at the 5-minute timeout.
+- Unloaded the model from memory to free RAM.
+- Rewrote the E4B row in STATUS.md to say "not eval-runnable on this hardware" instead of "unverified."
+
+**What I Did NOT Do:**
+
+- Did not get any E4B accuracy numbers. The hardware ceiling is a hard stop here, not a thing I can code around.
+- Did not try a cloud GPU. That's a $5-ish spot run on Modal or Replicate; worth doing only if the user wants that signal.
+
+**Confidence Level:** HIGH that E4B does not run usefully on an 8 GB Mac (direct evidence: 240 s timeout returning zero tokens). HIGH that the eval code path itself works (it ships green on E2B, same backend). UNKNOWN on whether E4B and E2B agree on the 4 IMCI scenarios — that is the question I could not answer this session.
